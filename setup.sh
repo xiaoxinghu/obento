@@ -26,10 +26,11 @@ pkgs=(shared)
 # mise's ~/.local/{bin,share}). The obento command lives in shared/.local/bin.
 install -d "$HOME/.local/bin"
 
-# Same guard for pi: keep ~/.pi/agent (and its extensions dir) as real dirs so
-# stow links individual config files instead of folding the whole tree into the
-# repo — that would swallow auth.json, sessions/, and herdr's extension.
-install -d "$HOME/.pi/agent/extensions"
+# Same guard for pi: keep ~/.pi/agent (and its extensions/skills dirs) as real
+# dirs so stow links individual entries instead of folding the whole tree into
+# the repo — that would swallow auth.json, sessions/, and herdr's extension, and
+# lets machine-local extensions/skills coexist with the stowed ones.
+install -d "$HOME/.pi/agent/extensions" "$HOME/.pi/agent/skills"
 
 echo "Stowing: ${pkgs[*]} -> $HOME"
 stow --dir="$REPO" --target="$HOME" --restow --verbose "${pkgs[@]}"
