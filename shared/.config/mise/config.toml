@@ -24,10 +24,12 @@ bottom = "latest"
 fzf = "latest"
 gum = "latest"
 gh = "latest"
+tokei = "latest"           # code statistics (lines of code by language)
 awscli = "latest"
 herdr = "latest"           # agent multiplexer (herdr.dev)
 "github:joshmedeski/sesh" = "latest"
 "npm:@earendil-works/pi-coding-agent" = "latest"
+"npm:pi-acp" = "latest"                          # ACP adapter (bridges pi <-> agent-shell/Zed)
 
 # language servers (editor-agnostic; used by eglot etc.)
 # tsls has no runtime `typescript` dep, so install it too; point eglot at it
