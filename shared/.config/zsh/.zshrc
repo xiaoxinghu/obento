@@ -133,4 +133,4 @@ zedz() {
 }
 
 # Machine-local config (secrets, per-host tweaks). Not tracked.
-[[ -f ~/.config/zsh/local.zsh ]] && source ~/.config/zsh/local.zsh
+[[ ! -f ~/.config/zsh/local.zsh ]] || source ~/.config/zsh/local.zsh
