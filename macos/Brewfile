@@ -17,6 +17,7 @@ brew "pass"
 # GUI apps + fonts
 cask "ghostty"
 cask "leader-key"
+cask "rcmd"
 cask "rectangle"
 cask "emacs-plus-app"
 cask "resilio-sync"

@@ -5,7 +5,8 @@
 
 [tools]
 # runtimes
-node = "lts"
+node = "26.2.0"
+python = "latest"
 
 # cli tools
 fd = "latest"
@@ -30,6 +31,7 @@ herdr = "latest"           # agent multiplexer (herdr.dev)
 "github:joshmedeski/sesh" = "latest"
 "npm:@earendil-works/pi-coding-agent" = "latest"
 "npm:pi-acp" = "latest"                          # ACP adapter (bridges pi <-> agent-shell/Zed)
+"cargo:raine/workmux" = "latest"
 
 # language servers (editor-agnostic; used by eglot etc.)
 # tsls has no runtime `typescript` dep, so install it too; point eglot at it

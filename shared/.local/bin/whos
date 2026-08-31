@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# whos [-p] <port> — show what's listening on a TCP port.
+#
+#   whos 3000        full lsof listing
+#   whos -p 3000     just the PID(s), one per line (pipe into kill)
+#   kill "$(whos -p 3000)"
+#
+# Thin wrapper around lsof (built into macOS; same flags on Linux).
+set -euo pipefail
+
+pids_only=false
+[[ "${1:-}" == "-p" ]] && { pids_only=true; shift; }
+
+port="${1:-}"
+[[ "$port" =~ ^[0-9]+$ ]] || { echo "usage: whos [-p] <port>" >&2; exit 1; }
+
+if $pids_only; then
+  # -t: terse output, PIDs only. No match -> empty output, exit 1.
+  lsof -t -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null || exit 1
+  exit 0
+fi
+
+out="$(lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null || true)"
+if [[ -z "$out" ]]; then
+  echo "Nothing is listening on TCP port $port."
+  exit 1
+fi
+
+echo "$out"

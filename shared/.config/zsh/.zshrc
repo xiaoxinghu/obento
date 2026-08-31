@@ -106,6 +106,7 @@ bindkey -M menuselect '^M' .accept-line
 GITSTATUS_LOG_LEVEL=DEBUG
 
 eval "$(zoxide init zsh)"
+command -v fzf >/dev/null && source <(fzf --zsh)
 eval "$(direnv hook zsh)"
 
 # --- key binds (history-substring-search; plugin loaded via antidote above) ---
