@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 ;; customisation
 (defun build-path (&rest parts)
   (cl-reduce (lambda (a b) (expand-file-name b a))

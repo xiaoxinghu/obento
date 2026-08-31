@@ -1,85 +1,9 @@
+;;; -*- lexical-binding: t; -*-
+
 (setq sgml-basic-offset 'tab)
 
-(use-package treesit
-  :ensure nil
-  :mode (("\\.tsx\\'" . tsx-ts-mode)
-         ("\\.js\\'"  . js-ts-mode)
-         ("\\.mjs\\'" . js-ts-mode)
-         ("\\.mts\\'" . typescript-ts-mode)
-         ("\\.cjs\\'" . js-ts-mode)
-         ("\\.ts\\'"  . typescript-ts-mode)
-         ("\\.jsx\\'" . tsx-ts-mode)
-         ("\\.json\\'" .  json-ts-mode)
-         ("\\.Dockerfile\\'" . dockerfile-ts-mode)
-         ;; ("\\.prisma\\'" . prisma-ts-mode)
-         ;; More modes defined here...
-         )
-  :preface
-  (defun mp-setup-install-grammars ()
-    "Install Tree-sitter grammars if they are absent."
-    (interactive)
-    (dolist (grammar
-             ;; Note the version numbers. These are the versions that
-             ;; are known to work with Combobulate *and* Emacs.
-             '((css . ("https://github.com/tree-sitter/tree-sitter-css" "v0.20.0"))
-               (c . ("https://github.com/tree-sitter/tree-sitter-c"))
-               (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
-               (go . ("https://github.com/tree-sitter/tree-sitter-go" "v0.20.0"))
-               (bash "https://github.com/tree-sitter/tree-sitter-bash")
-               (html . ("https://github.com/tree-sitter/tree-sitter-html" "v0.20.1"))
-               (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript" "v0.20.1" "src"))
-               (json . ("https://github.com/tree-sitter/tree-sitter-json" "v0.20.2"))
-               (markdown . ("https://github.com/ikatyang/tree-sitter-markdown" "v0.7.1"))
-               (python . ("https://github.com/tree-sitter/tree-sitter-python" "v0.20.4"))
-               (rust . ("https://github.com/tree-sitter/tree-sitter-rust" "v0.21.2"))
-               (toml . ("https://github.com/tree-sitter/tree-sitter-toml" "v0.5.1"))
-               (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" "v0.20.3" "tsx/src"))
-               (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "v0.20.3" "typescript/src"))
-               (lua . ("https://github.com/tree-sitter-grammars/tree-sitter-lua"))
-               (svelte . ("https://github.com/Himujjal/tree-sitter-svelte"))
-               (yaml . ("https://github.com/ikatyang/tree-sitter-yaml" "v0.5.0"))))
-      (add-to-list 'treesit-language-source-alist grammar)
-      ;; Only install `grammar' if we don't already have it
-      ;; installed. However, if you want to *update* a grammar then
-      ;; this obviously prevents that from happening.
-      (unless (treesit-language-available-p (car grammar))
-        (treesit-install-language-grammar (car grammar)))))
-
-  ;; Optional, but recommended. Tree-sitter enabled major modes are
-  ;; distinct from their ordinary counterparts.
-  ;;
-  ;; You can remap major modes with `major-mode-remap-alist'. Note
-  ;; that this does *not* extend to hooks! Make sure you migrate them
-  ;; also
-  (dolist (mapping
-           '((c-mode . c-ts-mode)
-						 (c++-mode . c++-ts-mode)
-						 (c-or-c++-mode . c-or-c++-ts-mode)
-						 (python-mode . python-ts-mode)
-             (css-mode . css-ts-mode)
-             (typescript-mode . typescript-ts-mode)
-             (js-mode . typescript-ts-mode)
-             (js2-mode . typescript-ts-mode)
-             (c-mode . c-ts-mode)
-             (c++-mode . c++-ts-mode)
-             (c-or-c++-mode . c-or-c++-ts-mode)
-             (bash-mode . bash-ts-mode)
-             (css-mode . css-ts-mode)
-             (json-mode . json-ts-mode)
-             (js-json-mode . json-ts-mode)
-             (lua-mode . lua-ts-mode)
-             (sh-mode . bash-ts-mode)
-             (sh-base-mode . bash-ts-mode)))
-    (add-to-list 'major-mode-remap-alist mapping))
-  :config
-  (mp-setup-install-grammars)
-  )
-
-;; (use-package treesit-auto
-;; 	:after treesit
-;; 	:config
-;; 	(global-treesit-auto-mode)
-;; 	(setq treesit-auto-install 'prompt))
+(setopt treesit-enabled-modes t
+        treesit-auto-install-grammar 'always)
 
 (add-hook 'python-mode-hook
 					(lambda ()

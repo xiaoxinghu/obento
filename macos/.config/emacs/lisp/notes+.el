@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 ;;;###autoload
 (defvar doom-fallback-buffer-name "*scratch*"
   "The name of the buffer to fall back to if no other buffers exist (will create

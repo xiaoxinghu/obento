@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (defun xah-new-empty-buffer ()
   "Create a new empty buffer.
 Returns the buffer object.

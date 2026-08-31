@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (setq completion-cycle-threshold 3
       tab-always-indent 'complete
       set-mark-command-repeat-pop t)

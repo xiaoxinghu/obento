@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (setq js-indent-level 2)
 
 (defun my/web-mode-hook ()
@@ -45,7 +47,12 @@
 (use-package svelte-ts-mode
 	;; :after eglot
 	:mode "\\.svelte\\'"
-	:vc (:url "https://github.com/leafOfTree/svelte-ts-mode" :rev :newest))
+	:vc (:url "https://github.com/leafOfTree/svelte-ts-mode" :rev :newest)
+  :init
+  (add-to-list 'treesit-language-source-alist
+               '(svelte "https://github.com/tree-sitter-grammars/tree-sitter-svelte"))
+  :config
+  (treesit-ensure-installed 'svelte))
 
 (use-package json-mode
   :mode "\\.js\\(?:on\\|[hl]int\\(?:rc\\)?\\)\\'"

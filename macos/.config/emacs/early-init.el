@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (setenv "LSP_USE_PLISTS" "true")
 
 (setq enable-local-variables :safe

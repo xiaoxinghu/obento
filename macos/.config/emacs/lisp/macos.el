@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (defun +macos-defaults (action &rest args)
   (apply #'doom-call-process "defaults" action args))
 

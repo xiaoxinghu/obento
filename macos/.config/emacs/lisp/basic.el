@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (setq ad-redefinition-action 'accept)
 (setq package-check-signature nil)
 (setq help-window-select t)

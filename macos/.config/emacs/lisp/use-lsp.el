@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 ;; inspired by this article
 ;; https://www.ovistoica.com/blog/2024-7-05-modern-emacs-typescript-web-tsx-config
 
