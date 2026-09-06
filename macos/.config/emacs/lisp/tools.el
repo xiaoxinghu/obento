@@ -1,11 +1,24 @@
 ;;; -*- lexical-binding: t; -*-
 
 (use-package vterm
+	:disabled t
   :custom
   (vterm-module-cmake-args "-DCMAKE_PREFIX_PATH=/opt/homebrew")
   )
 
-(use-package eat)
+(use-package eat
+	:disabled t)
+
+(use-package ghostel
+  :bind (("s-t" . ghostel))
+	:config
+	(add-to-list 'project-switch-commands '(ghostel-project "Ghostel") t)
+	(add-to-list 'project-switch-commands '(ghostel-project-list-buffers "Ghostel buffers") t)
+  (add-to-list 'ghostel-eval-cmds '("magit-status-setup-buffer" magit-status-setup-buffer)))
+
+(use-package evil-ghostel
+  :after (ghostel evil)
+  :hook (ghostel-mode . evil-ghostel-mode))
 
 (use-package pdf-tools
 	:disabled t

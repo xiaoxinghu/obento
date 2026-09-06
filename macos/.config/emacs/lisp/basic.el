@@ -1,6 +1,7 @@
 ;;; -*- lexical-binding: t; -*-
 
 (setq ad-redefinition-action 'accept)
+(setq vc-follow-symlinks t)
 (setq package-check-signature nil)
 (setq help-window-select t)
 (setq save-interprogram-paste-before-kill t)
@@ -13,7 +14,6 @@
 (setenv "GPG_AGENT_INFO" nil)
 (setq epg-gpg-program "/run/current-system/sw/bin/gpg")
 (setq epg-pinentry-mode 'loopback)
-(setq auth-source-debug t)
 ;; (desktop-save-mode 1)
 
 (use-package server
@@ -98,8 +98,6 @@
 	;; (add-to-list 'auth-sources 'macos-keychain-internet)
 	;; (add-to-list 'auth-sources 'macos-keychain-generic)
 	)
-
-(auth-source-pass-enable)
 
 (use-package ultra-scroll
 	:disabled t

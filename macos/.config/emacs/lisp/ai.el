@@ -1,30 +1,24 @@
 ;;; ai.el --- AI assistant configuration -*- lexical-binding: t; -*-
 
-(setenv "OPENAI_API_KEY"
-        (auth-source-pick-first-password
-         :host "openai"
-         :user "api-key"))
-
-(setenv "GEMINI_API_KEY"
-        (auth-source-pick-first-password
-         :host "gemini"
-         :user "api-key"))
-
 ;;; Commentary:
 ;; Configuration for various AI assistants and code completion tools in Emacs.
 
 ;;; Code:
 
+(defun my/ai-api-key (host)
+  "Return the API key for HOST from auth-source."
+  (auth-source-pick-first-password :host host :user "api-key"))
+
 ;;; gptel - Primary AI interface
 (use-package gptel
   :config
   ;; API key configuration
-  ;; (setq gptel-api-key (auth-source-pick-first-password :host "openai" :user "api-key"))
+  (setq gptel-api-key (lambda () (my/ai-api-key "openai")))
 
   ;; Configure Claude backend
   (setq gptel-backend
-				(gptel-make-anthropic "Claude"
-					:key (auth-source-pick-first-password :host "claude" :user "api-key")))
+        (gptel-make-anthropic "Claude"
+          :key (lambda () (my/ai-api-key "claude"))))
 
   ;; Default settings
   (setq gptel-default-mode #'org-mode)
@@ -157,6 +151,8 @@
 	(setq minuet-context-window 512)
 	(plist-put minuet-openai-fim-compatible-options :end-point "http://localhost:1234/v1/completions")
 	(setq minuet-provider 'gemini)
+	(setf (plist-get minuet-gemini-options :api-key)
+				(lambda () (my/ai-api-key "gemini")))
 	(plist-put minuet-openai-compatible-options
              :model "gemini-2.0-flash")
 	;; (plist-put minuet-openai-fim-compatible-options

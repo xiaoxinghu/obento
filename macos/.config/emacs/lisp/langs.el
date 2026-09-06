@@ -1,6 +1,7 @@
 ;;; -*- lexical-binding: t; -*-
 
 (setq js-indent-level 2)
+(add-to-list 'auto-mode-alist '("\\.[cm]js\\'" . javascript-mode))
 
 (defun my/web-mode-hook ()
   "Hooks for Web mode."
@@ -54,21 +55,9 @@
   :config
   (treesit-ensure-installed 'svelte))
 
-(use-package json-mode
-  :mode "\\.js\\(?:on\\|[hl]int\\(?:rc\\)?\\)\\'"
-  :init
-  :config
-  ;; (map! :after json-mode
-  ;;       :map json-mode-map
-  ;;       :localleader
-  ;;       :desc "Copy path" "p" #'json-mode-show-path
-  ;;       "t" #'json-toggle-boolean
-  ;;       "d" #'json-mode-kill-path
-  ;;       "x" #'json-nullify-sexp
-  ;;       "+" #'json-increment-number-at-point
-  ;;       "-" #'json-decrement-number-at-point
-  ;;       "f" #'json-mode-beautify)
-  )
+(use-package json-ts-mode
+  :ensure nil
+  :mode "\\.js\\(?:on\\|[hl]int\\(?:rc\\)?\\)\\'")
 
 (add-to-list 'auto-mode-alist '("\\.jsonc\\'" . jsonc-mode))
 

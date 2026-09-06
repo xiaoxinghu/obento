@@ -148,8 +148,6 @@ _SPC_ send        _q_ quit
   :hook
   (org-mode . global-org-modern-mode))
 
-(setq-default line-spacing 2)
-
 ;; look and feel
 ;; (use-package olivetti)
 

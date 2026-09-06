@@ -12,7 +12,7 @@
 						(setq py-indent-tabs-mode nil)))
 
 (use-package combobulate
-  ;; :disabled t
+  :disabled t
   :vc (:url "https://github.com/mickeynp/combobulate" :rev :newest)
   :custom
   ;; You can customize Combobulate's key prefix here.
@@ -30,11 +30,6 @@
   :demand t
   :after evil
   :config
-  (customize-set-variable
-   'evil-textobj-tree-sitter-major-mode-language-alist
-   (cons '(tsx-ts-mode . "typescript")
-         evil-textobj-tree-sitter-major-mode-language-alist))
-
   ;; bind `function.outer`(entire function block) to `f` for use in things like `vaf`, `yaf`
   (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
   (define-key evil-outer-text-objects-map "v" (evil-textobj-tree-sitter-get-textobj "parameter.outer"))
@@ -84,7 +79,10 @@
     ("p" projectile-switch-project "find project" :color blue)
     ("f" projectile-find-file "file file" :color blue)
     ("b" consult-project-buffer "find buffer" :color blue)
-    ("t" jump-to-project-todo "project TODO" :color blue)
+    ("c" my/project-compile "compile" :color blue)
+    ("C" recompile "recompile" :color blue)
+    ("s" my/run-package-script "npm script" :color blue)
+    ("t" ghostel-project "terminal" :color blue)
     ("r" forge-browse-repository "repos" :color blue)
     ("q" nil))
 
@@ -130,11 +128,11 @@
   ;; configuration.  Taken from
   ;; http://whattheemacsd.com/setup-magit.el-01.html#comment-748135498
   ;; and http://irreal.org/blog/?p=2253
-  (defadvice magit-status (around magit-fullscreen activate)
+  (define-advice magit-status (:around (fn &rest args) fullscreen)
     (window-configuration-to-register :magit-fullscreen)
-    ad-do-it
-    (delete-other-windows))
-  (defadvice magit-quit-window (after magit-restore-screen activate)
+    (prog1 (apply fn args)
+      (delete-other-windows)))
+  (define-advice magit-quit-window (:after (&rest _) restore-screen)
     (jump-to-register :magit-fullscreen))
   :custom
   (magit-diff-refine-hunk 'all)
@@ -305,11 +303,19 @@
   )
 
 
+(defun my/yas-typescript-snippets ()
+  "Make JavaScript snippets available in native TypeScript modes."
+  (require 'yasnippet)
+  (yas-activate-extra-mode 'js-mode))
+
 (use-package yasnippet
   :custom
   (yas-snippet-dirs `(,(expand-file-name "snippets" user-emacs-directory)))
   ;; (yas-snippet-dirs '("~/.config/emacs/snippets"))
-  :hook (prog-mode . yas-minor-mode))
+	:hook ((prog-mode . yas-minor-mode)
+	       ((typescript-ts-mode tsx-ts-mode) . my/yas-typescript-snippets))
+	:config
+	(yas-reload-all t))
 
 (use-package yasnippet-capf
   :after yasnippet

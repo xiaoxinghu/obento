@@ -15,7 +15,6 @@
 (setq backup-by-copying t)
 (setq ring-bell-function 'ignore)
 (setq-default tab-width 2)
-(global-visual-line-mode t)
 ;; https://emacs.stackexchange.com/questions/41886/html-mail-background-has-same-color-as-text
 (setq shr-color-visible-luminance-min 80)
 
@@ -58,16 +57,52 @@
   :if (display-graphic-p))
 
 (use-package mixed-pitch
-  :disabled t
   :hook
-  ;; If you want it in all text modes:
   ((org-mode markdown-mode) . mixed-pitch-mode))
+
+(use-package olivetti
+  :custom
+  (olivetti-body-width 0.75)
+  :hook
+  ((org-mode markdown-mode) . olivetti-mode))
+
+(defun my/prose-mode ()
+  "Set comfortable display defaults for prose buffers only."
+  (visual-line-mode 1)
+  (setq-local line-spacing 0.2))
+
+(defun my/prose-heading-faces ()
+  "Give Org and Markdown headings a publication-like hierarchy."
+  (dolist (heading '((1 . 1.6) (2 . 1.35) (3 . 1.2)
+                     (4 . 1.1) (5 . 1.05) (6 . 1.0)))
+    (dolist (face (list (intern (format "org-level-%d" (car heading)))
+                        (intern (format "markdown-header-face-%d" (car heading)))))
+      (when (facep face)
+        (set-face-attribute face nil
+                            :family "SF Pro Text"
+                            :height (cdr heading)
+                            :weight 'bold)))))
+
+(add-hook 'org-mode-hook #'my/prose-mode)
+(add-hook 'markdown-mode-hook #'my/prose-mode)
+(add-hook 'org-mode-hook #'my/prose-heading-faces)
+(add-hook 'markdown-mode-hook #'my/prose-heading-faces)
+
+;; Keep prose readable while preserving alignment for code and tables.
+(set-face-attribute 'variable-pitch nil :family "SF Pro Text" :height 1.1)
+(set-face-attribute 'fixed-pitch nil :family "JetBrainsMono Nerd Font")
 
 (use-package doom-modeline
 	;; :disabled t
   :init (doom-modeline-mode 1)
   :custom ((doom-modeline-workspace-name t))
   )
+
+(use-package nyan-mode
+  :vc (:url "https://github.com/TeMPOraL/nyan-mode" :rev :newest)
+  :demand t
+  :config
+  (nyan-mode 1))
 
 (use-package hl-line ; built in
   :ensure nil
@@ -213,6 +248,7 @@
       mac-mouse-wheel-smooth-scroll nil)
 
 (use-package spacious-padding
+	:disabled t
   :hook (after-init . spacious-padding-mode)
   :config
   (setq spacious-padding-widths

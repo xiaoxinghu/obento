@@ -1,5 +1,19 @@
 ;;; -*- lexical-binding: t; -*-
 
+;; Eglot's default code-action indicator probes several Unicode glyphs while
+;; it is first loaded.  On macOS, the first `internal-char-font' lookup can
+;; take seconds, so do that work once after startup while Emacs is idle.
+(defun my/eglot-warm-font-cache ()
+  "Warm the graphical font cache used by Eglot's default indicator."
+  (when (display-graphic-p)
+    (char-displayable-p ?↯)))
+
+(defun my/eglot-schedule-font-cache-warmup ()
+  "Schedule Eglot's font-cache warm-up after startup."
+  (run-with-idle-timer 0 nil #'my/eglot-warm-font-cache))
+
+(add-hook 'after-init-hook #'my/eglot-schedule-font-cache-warmup)
+
 (use-package eglot
   :ensure nil
   :hook
@@ -90,9 +104,13 @@
 
   (add-to-list
    'eglot-server-programs
-   '((js-mode js-ts-mode tsx-ts-mode typescript-ts-mode typescript-mode jsx-mode)
-     "typescript-language-server" "--stdio"
-     ;; "tsgo" "--lsp" "-stdio"
+   '(((js-mode :language-id "javascript")
+      (js-ts-mode :language-id "javascript")
+      (tsx-ts-mode :language-id "typescriptreact")
+      (typescript-ts-mode :language-id "typescript")
+      (typescript-mode :language-id "typescript")
+      (jsx-mode :language-id "javascriptreact"))
+     "sh" "-c" "exec \"$(mise where npm:typescript)\"/node_modules/.bin/tsc --lsp --stdio"
      :initializationOptions
      (:preferences
       (
@@ -162,18 +180,10 @@
     ";" 'hydra-eglot/body)
   )
 
-(with-eval-after-load 'eglot
-  (defun my/eglot--format-markup (thing)
-    "Return plain text from THING (suppress markdown font-lock)."
-    (if (stringp thing)
-        thing
-      (replace-regexp-in-string "\r" "" (or (plist-get thing :value) ""))))
-  (advice-add 'eglot--format-markup :override #'my/eglot--format-markup))
-
 ;; this makes eldoc less aggressive, fixes performance issues with large markdown-like docs
 ;; from language servers
 (setq eldoc-echo-area-use-multiline-p nil)
-(setq eldoc-idle-delay 0.5) ;; very slow refresh
+;; (setq eldoc-idle-delay 0.2) ;; very slow refresh
 
 (use-package eldoc-box
   ;; :hook (eglot-managed-mode . eldoc-box-hover-mode)
@@ -194,7 +204,7 @@
                 ;; Vim-style navigation
                 (define-key map (kbd "j") #'eldoc-box-scroll-down)
                 (define-key map (kbd "k") #'eldoc-box-scroll-up)
-                (define-key map (kbd "q") #'eldoc-box--hide-frame)
+                (define-key map (kbd "q") #'eldoc-box-quit-frame)
                 ;; assign to the local buffer
                 (use-local-map (make-composed-keymap map (current-local-map))))))
 	)

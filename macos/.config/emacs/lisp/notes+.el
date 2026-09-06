@@ -111,7 +111,7 @@ The def* forms accepted are:
               (`defadvice
 									(if (keywordp (cadr rest))
 											(cl-destructuring-bind (target where fn) rest
-												`(when-let (fn ,fn)
+												`(when-let* ((fn ,fn))
 													 (advice-add ,target ,where fn)
 													 (unwind-protect ,body (advice-remove ,target fn))))
 										(let* ((fn (pop rest))
