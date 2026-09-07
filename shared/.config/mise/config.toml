@@ -9,6 +9,7 @@ node = "26.2.0"
 python = "latest"
 
 # cli tools
+biome = "latest"
 fd = "latest"
 eza = "latest"
 zoxide = "latest"
