@@ -1,5 +1,16 @@
 ;;; -*- lexical-binding: t; -*-
 
+(defun my/eglot-ensure ()
+  "Like `eglot-ensure', but never root a server at $HOME.
+A stray file outside a project makes $HOME the project root, and the
+server then asks to watch every file under it.  See
+https://github.com/joaotavora/eglot/issues/1258"
+  (let ((root (or (ignore-errors (project-root (project-current)))
+                  default-directory)))
+    (if (file-equal-p root "~/")
+        (message "Eglot not started: %s is not in a project" buffer-file-name)
+      (eglot-ensure))))
+
 ;; Eglot's default code-action indicator probes several Unicode glyphs while
 ;; it is first loaded.  On macOS, the first `internal-char-font' lookup can
 ;; take seconds, so do that work once after startup while Emacs is idle.
@@ -33,7 +44,7 @@
     c-ts-mode
     c++-ts-mode
     c-or-c++-ts-mode
-    ) . eglot-ensure)
+    ) . my/eglot-ensure)
   :custom
   (eglot-confirm-server-initiated-edits nil)
   :config
@@ -155,6 +166,32 @@
        :disableLineTextInReferences                           :json-false))
 		 )
    )
+
+  ;; File watching.  On macOS every watch costs a file descriptor (kqueue),
+  ;; and a directory watch cannot even see edits to files inside it, so
+  ;; Eglot-side watching is both expensive and half-blind.  typescript-go,
+  ;; tsserver and pyright all fall back to their own native FSEvents
+  ;; watching when the client doesn't advertise the capability.
+  ;; https://github.com/joaotavora/eglot/issues/1258
+  ;; https://github.com/joaotavora/eglot/issues/1568
+  (cl-defmethod eglot-client-capabilities :around (_server)
+    (let ((caps (cl-call-next-method)))
+      (plist-put (plist-get caps :workspace)
+                 :didChangeWatchedFiles '(:dynamicRegistration :json-false))
+      caps))
+  ;; Backstop for servers that register watchers anyway.  Both are defvars,
+  ;; so `:custom' can't set them.  Upstream defaults are t and 10000.
+  (setq eglot-watch-files-outside-project-root nil
+        eglot-max-file-watches 2000)
+
+  ;; `tsc --lsp' dynamically registers workspace/didChangeConfiguration, which
+  ;; Eglot has no use for.  Accept it silently instead of warning on every file.
+  (cl-defmethod eglot-register-capability
+    (_server (_method (eql workspace/didChangeConfiguration)) _id &rest _params)
+    nil)
+  (cl-defmethod eglot-unregister-capability
+    (_server (_method (eql workspace/didChangeConfiguration)) _id &rest _params)
+    nil)
 
 	(add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd"))
   (defhydra hydra-eglot (:hint nil)
