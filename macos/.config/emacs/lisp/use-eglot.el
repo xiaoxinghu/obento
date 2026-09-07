@@ -220,7 +220,6 @@ https://github.com/joaotavora/eglot/issues/1258"
 ;; this makes eldoc less aggressive, fixes performance issues with large markdown-like docs
 ;; from language servers
 (setq eldoc-echo-area-use-multiline-p nil)
-;; (setq eldoc-idle-delay 0.2) ;; very slow refresh
 
 (use-package eldoc-box
   ;; :hook (eglot-managed-mode . eldoc-box-hover-mode)

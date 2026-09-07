@@ -286,7 +286,8 @@
 (use-package eldoc
   :ensure nil
   :config
-  (setq eldoc-idle-delay 0
+  ;; Wait for a pause in typing/movement before requesting documentation.
+  (setq eldoc-idle-delay 0.5
         eldoc-echo-area-use-multiline-p nil))
 
 ;; Better indentation.
