@@ -58,13 +58,12 @@
 
 (use-package mixed-pitch
   :hook
-  ((org-mode markdown-mode) . mixed-pitch-mode))
+  ((org-mode md-mode) . mixed-pitch-mode)
+  :config
+  (dolist (face '(md-render-inline-code md-render-source-block
+																				md-render-source-block-language))
+    (add-to-list 'mixed-pitch-fixed-pitch-faces face)))
 
-(use-package olivetti
-  :custom
-  (olivetti-body-width 0.75)
-  :hook
-  ((org-mode markdown-mode) . olivetti-mode))
 
 (defun my/prose-mode ()
   "Set comfortable display defaults for prose buffers only."
@@ -76,7 +75,7 @@
   (dolist (heading '((1 . 1.6) (2 . 1.35) (3 . 1.2)
                      (4 . 1.1) (5 . 1.05) (6 . 1.0)))
     (dolist (face (list (intern (format "org-level-%d" (car heading)))
-                        (intern (format "markdown-header-face-%d" (car heading)))))
+                        (intern (format "md-render-header-%d" (car heading)))))
       (when (facep face)
         (set-face-attribute face nil
                             :family "SF Pro Text"
@@ -84,9 +83,9 @@
                             :weight 'bold)))))
 
 (add-hook 'org-mode-hook #'my/prose-mode)
-(add-hook 'markdown-mode-hook #'my/prose-mode)
+(add-hook 'md-mode-hook #'my/prose-mode)
 (add-hook 'org-mode-hook #'my/prose-heading-faces)
-(add-hook 'markdown-mode-hook #'my/prose-heading-faces)
+(add-hook 'md-mode-hook #'my/prose-heading-faces)
 
 ;; Keep prose readable while preserving alignment for code and tables.
 (set-face-attribute 'variable-pitch nil :family "SF Pro Text" :height 1.1)

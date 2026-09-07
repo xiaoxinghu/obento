@@ -66,10 +66,21 @@
 (use-package csv-mode)
 
 (use-package markdown-mode
+  :disabled t
   :mode "\\.md\\'"
   :config
   (setq markdown-command "multimarkdown")
   (unbind-key "M-p" markdown-mode-map))
+
+(use-package md-mode
+  :vc (:url "https://github.com/yibie/md-mode" :rev :newest)
+  :mode ("\\.\\(?:md\\|markdown\\)\\'" . md-mode)
+  :custom
+  (md-mode-auto-align-tables nil)
+  (md-mode-use-markdown-mode-faces nil)
+  (md-render-wrap-lines t)
+  (md-render-table-zebra-stripe nil)
+  :hook (md-mode . (lambda () (setq-local olivetti-body-width 85))))
 
 (use-package mermaid-mode
   :mode "\\.mmd\\'"
