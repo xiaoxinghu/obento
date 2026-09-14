@@ -2,7 +2,6 @@
 # Login shell configuration
 
 export BUN_INSTALL="$HOME/.bun"
-export PATH="$HOME/.local/bin:$BUN_INSTALL/bin:$PATH"
 
 # Drop straight into a multiplexer on SSH login. Runs here (login shell, before
 # .zshrc) so it takes over ahead of p10k's instant prompt. Guards: interactive

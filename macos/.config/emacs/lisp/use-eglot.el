@@ -213,7 +213,7 @@ https://github.com/joaotavora/eglot/issues/1258"
   (evil-define-key 'normal 'eglot-mode-map
     "gR" 'eglot-rename
     ;; "." 'eglot-code-action-quickfix
-		"K" 'eldoc-box-help-at-point
+		"K" 'my/eldoc-box-help-at-point
     ";" 'hydra-eglot/body)
   )
 
@@ -222,28 +222,23 @@ https://github.com/joaotavora/eglot/issues/1258"
 (setq eldoc-echo-area-use-multiline-p nil)
 
 (use-package eldoc-box
-  ;; :hook (eglot-managed-mode . eldoc-box-hover-mode)
-	:config
-	;; (defun my/eldoc-box-setup-keys ()
-	;; 	"Set up buffer-local keybindings in the eldoc-box buffer."
-	;; 	;; `this-buffer` is the doc buffer of eldoc-box
-	;; 	(local-set-key (kbd "j") #'eldoc-box-scroll-down)   ;; j scrolls *down* (because content moves up)
-	;; 	(local-set-key (kbd "k") #'eldoc-box-scroll-up)
-	;; 	(local-set-key (kbd "q") #'eldoc-box--hide-frame)
-	;; 	;; Optionally <escape>
-	;; 	(local-set-key (kbd "<escape>") #'eldoc-box--hide-frame))
-	;; (add-hook 'eldoc-box-buffer-hook #'my/eldoc-box-setup-keys)
-
-	(add-hook 'eldoc-box-buffer-hook
-            (lambda ()
-              (let ((map (make-sparse-keymap)))
-                ;; Vim-style navigation
-                (define-key map (kbd "j") #'eldoc-box-scroll-down)
-                (define-key map (kbd "k") #'eldoc-box-scroll-up)
-                (define-key map (kbd "q") #'eldoc-box-quit-frame)
-                ;; assign to the local buffer
-                (use-local-map (make-composed-keymap map (current-local-map))))))
-	)
+  :demand t
+  :config
+  (defun my/eldoc-box-help-at-point ()
+    "Show documentation without taking focus; dismiss on the next key."
+    (interactive)
+    ;; Upstream focuses an already-visible popup on a second invocation.
+    (unless (eldoc-box--frame-visible-p)
+      (setq eldoc-box--main-frame (selected-frame))
+      (eldoc-box-help-at-point))
+    (eldoc-box-unfocus-frame)
+    (when (eldoc-box--frame-visible-p)
+      ;; A transient map takes precedence over Evil, even inside the popup.
+      ;; Other keys dismiss the popup and run their usual command.
+      (let ((map (make-sparse-keymap)))
+        (dolist (key '("q" "<escape>" "C-g"))
+          (define-key map (kbd key) #'eldoc-box-quit-frame))
+        (set-transient-map map nil #'eldoc-box-quit-frame)))))
 
 (use-package eglot-booster
   :vc (:url "https://github.com/jdtsmith/eglot-booster" :rev :newest)

@@ -149,7 +149,11 @@ _SPC_ send        _q_ quit
   (org-mode . global-org-modern-mode))
 
 ;; look and feel
-;; (use-package olivetti)
+;; (use-package olivetti
+;;   :custom
+;;   (olivetti-body-width 0.75)
+;;   :hook
+;;   ((org-mode md-mode) . olivetti-mode))
 
 (defun my/org-mode ()
   ;; (olivetti-mode)

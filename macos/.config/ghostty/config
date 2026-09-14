@@ -14,3 +14,5 @@ shell-integration-features = ssh-env,ssh-terminfo
 # Sends tmux prefix (Ctrl-b) then K; tmux.conf owns the actual command.
 # Overrides default Cmd+K clear-screen binding.
 keybind = super+k=text:\x02K
+
+macos-option-as-alt = true

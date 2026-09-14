@@ -128,6 +128,7 @@
 
 ;; document the config of minuet
 (use-package minuet
+	:disabled t
 	:init
   ;; if you want to enable auto suggestion.
   ;; Note that you can manually invoke completions without enable minuet-auto-suggestion-mode

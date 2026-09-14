@@ -23,14 +23,14 @@ fi
 # Local user binaries
 export PATH="$HOME/.local/bin:$PATH"
 
+# Bun
+export PATH="$HOME/.bun/bin:$PATH"
+
 # mise shims — make mise-managed tools (rg, node, nvim, …) available to
 # non-interactive shells and GUI apps (e.g. Emacs via exec-path-from-shell)
 # that don't run `mise activate`. Interactive shells still prefer the real
 # tool dirs that `mise activate` prepends in .zshrc.
 export PATH="${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims:$PATH"
-
-# Bun
-export PATH="$HOME/.bun/bin:$PATH"
 
 # Rust / Cargo
 [[ -d "$HOME/.cargo" ]] && . "$HOME/.cargo/env"

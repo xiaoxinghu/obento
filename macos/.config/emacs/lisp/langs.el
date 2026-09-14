@@ -80,7 +80,8 @@
   (md-mode-use-markdown-mode-faces nil)
   (md-render-wrap-lines t)
   (md-render-table-zebra-stripe nil)
-  :hook (md-mode . (lambda () (setq-local olivetti-body-width 85))))
+  :hook ((md-mode . md-mode-render)
+         (md-mode . (lambda () (setq-local olivetti-body-width 85)))))
 
 (use-package mermaid-mode
   :mode "\\.mmd\\'"
