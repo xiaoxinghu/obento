@@ -9,6 +9,8 @@ node = "26.8.1"
 python = "latest"
 
 # cli tools
+cmake = "latest"          # native C/Swift project configuration
+ninja = "latest"          # executes CMake-generated builds
 biome = "latest"
 fd = "latest"
 eza = "latest"
