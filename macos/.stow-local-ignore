@@ -4,6 +4,9 @@
 # Provisioning metadata, not a dotfile to symlink
 ^/Brewfile$
 
+# Emacs runtime state (Git ignore rules do not apply to Stow)
+^/\.config/emacs/var$
+
 # --- stow defaults ---
 RCS
 .+,v

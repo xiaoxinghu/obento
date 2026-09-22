@@ -5,7 +5,7 @@
 
 [tools]
 # runtimes
-node = "26.8.1"
+node = "26.9.0"
 python = "latest"
 
 # cli tools
@@ -41,4 +41,5 @@ herdr = "latest"           # agent multiplexer (herdr.dev)
 # via tsserver.path -> ~/.local/share/mise/installs/npm-typescript/latest/lib/node_modules/typescript/lib
 "npm:typescript-language-server" = "latest"
 "npm:typescript" = "latest"
-pnpm = "11.25.0"
+pnpm = "12.5.1"
+codex = "latest"
