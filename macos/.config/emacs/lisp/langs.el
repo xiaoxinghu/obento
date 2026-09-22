@@ -109,4 +109,7 @@
   :config
   (setq rustic-lsp-server 'rust-analyzer))
 
+(use-package swift-mode
+  :mode "\\.swift\\'")
+
 (provide 'langs)

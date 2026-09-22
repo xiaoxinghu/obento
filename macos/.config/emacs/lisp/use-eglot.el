@@ -41,6 +41,7 @@ https://github.com/joaotavora/eglot/issues/1258"
     yaml-ts-mode
     svelte-mode
     svelte-ts-mode
+    swift-mode
     c-ts-mode
     c++-ts-mode
     c-or-c++-ts-mode
@@ -76,6 +77,8 @@ https://github.com/joaotavora/eglot/issues/1258"
    `(astro-mode . ("astro-ls" "--stdio")))
 
 	(add-to-list 'eglot-server-programs '(svelte-ts-mode . ("svelteserver" "--stdio")))
+
+  (add-to-list 'eglot-server-programs '(swift-mode . ("sourcekit-lsp")))
 
   (add-to-list 'eglot-server-programs
                '(markdown-mode . ("remark-language-server" "--stdio")))
