@@ -446,4 +446,16 @@ _c_: continue     _L_: log message     _D_: disconnect
   :custom
   (window-sides-vertical t))
 
+;; (use-package difftastic
+;;   :defer t
+;;   :vc (:url "https://github.com/pkryger/difftastic.el.git"
+;; 						:rev :newest))
+
+(use-package magit-difftastic
+  :vc (:url "https://github.com/rschmukler/magit-difftastic.git")
+	:after magit
+	:config
+	(setq magit-difftastic-display "inline")
+	(magit-difftastic-mode +1))
+
 (provide 'code)
