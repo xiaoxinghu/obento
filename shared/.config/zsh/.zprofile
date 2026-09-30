@@ -1,8 +1,6 @@
 # -*- mode: shell-script -*-
 # Login shell configuration
 
-export BUN_INSTALL="$HOME/.bun"
-
 # Drop straight into a multiplexer on SSH login. Runs here (login shell, before
 # .zshrc) so it takes over ahead of p10k's instant prompt. Guards: interactive
 # shell only (never scp/rsync/`ssh host cmd`), only over SSH (harmless on local

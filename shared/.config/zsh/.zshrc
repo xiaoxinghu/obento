@@ -17,6 +17,15 @@ fi
 command -v mise >/dev/null && eval "$(mise activate zsh)"
 
 fpath=(~/.config/zsh/functions $fpath)
+
+# bun completions, generated once (must be on fpath before compinit).
+# Delete the file to refresh after `mise upgrade bun`.
+if (( $+commands[bun] )); then
+  bun_comp=~/.local/share/zsh/site-functions/_bun
+  [[ -s $bun_comp ]] || { mkdir -p ${bun_comp:h}; bun completions >| $bun_comp; }
+  fpath=(${bun_comp:h} $fpath)
+  unset bun_comp
+fi
 autoload -Uz ~/.config/zsh/functions/*(N:t)
 
 autoload -Uz compinit
@@ -112,14 +121,6 @@ eval "$(direnv hook zsh)"
 # --- key binds (history-substring-search; plugin loaded via antidote above) ---
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
-
-# load bun completions
-if (( $+commands[bun] )); then
-  [ -s ~/.bun/_bun ] || bun completions >| ~/.bun/_bun
-  mkdir -p ~/.local/share/zsh/site-functions
-  cp ~/.bun/_bun ~/.local/share/zsh/site-functions/_bun
-  fpath+=(~/.local/share/zsh/site-functions)
-fi
 
 # autocompletion via carapace
 export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional

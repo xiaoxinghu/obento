@@ -23,8 +23,10 @@ fi
 # Local user binaries
 export PATH="$HOME/.local/bin:$PATH"
 
-# Bun
-export PATH="$HOME/.bun/bin:$PATH"
+# Bun itself comes from mise; ~/.bun only holds global packages
+# (`bun add -g`, `bun link`) and their bins.
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
 
 # mise shims — make mise-managed tools (rg, node, nvim, …) available to
 # non-interactive shells and GUI apps (e.g. Emacs via exec-path-from-shell)

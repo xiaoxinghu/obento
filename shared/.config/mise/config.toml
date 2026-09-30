@@ -7,6 +7,7 @@
 # runtimes
 node = "26.9.0"
 python = "latest"
+bun = "latest"          # upgrade with `mise upgrade bun`, not `bun upgrade`
 
 # cli tools
 cmake = "latest"          # native C/Swift project configuration
