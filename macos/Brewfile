@@ -16,9 +16,7 @@ brew "pass"
 
 # GUI apps + fonts
 cask "ghostty"
-cask "leader-key"
-cask "rcmd"
-cask "rectangle"
+cask "aerospace"
 cask "emacs-plus-app"
 cask "resilio-sync"
 cask "font-jetbrains-mono-nerd-font"
