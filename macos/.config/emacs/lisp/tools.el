@@ -164,4 +164,41 @@
 (use-package links
   :load-path "~/workspace/links.el")
 
+(use-package portal
+  :load-path "~/workspace/portal"
+	:ensure nil
+	:demand t
+  :bind (("s-p" . hydra-portal/body))
+	:custom
+	(portal-terminal-theme "Catppuccin Mocha")
+	:config
+  (defhydra hydra-portal (:color blue :hint nil)
+    "Portal"
+    ("p" portal-terminal-choose-project "project terminal")
+    ("t" portal-terminal-choose "all terminals")
+    ("n" portal-terminal-new "new terminal")
+    ("r" portal-terminal-rename "rename terminal")
+    ("z" portal-terminal-zoom "zoom terminal")
+    ("a" portal-tasks "project tasks")
+    ("m" portal-preview-markdown "markdown preview")
+    ("h" portal-preview-html "html preview")
+    ("e" portal-excalidraw "excalidraw")
+    ("u" portal-open-url "open URL")
+    ("q" nil "quit"))
+	(keymap-global-set "s-t" #'portal-terminal-toggle)
+	(portal-terminal-bind-key portal-terminal-quick-native-map
+														"s-t" #'portal-terminal-toggle)
+
+  (require 'portal-launcher)
+  (require 'portal-global-shortcut)
+
+  (defun my/app-launcher ()
+    "Launch an app or search the web in Portal's panel.
+With a prefix argument, rebuild the application index first."
+    (interactive)
+    (portal-launcher-present #'launcher :kind 'minibuffer))
+
+  (portal-global-shortcut-set 'app-launcher "Control-Option-Command-P"
+                              #'my/app-launcher))
+
 (provide 'tools)
