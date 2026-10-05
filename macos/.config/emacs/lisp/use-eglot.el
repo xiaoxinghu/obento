@@ -34,6 +34,10 @@ https://github.com/joaotavora/eglot/issues/1258"
     web-mode
     js2-mode
     js-mode
+    js-json-mode
+    json-mode
+    json-ts-mode
+    jsonc-mode
     yaml-mode
     python-mode
     js-ts-mode
@@ -169,6 +173,27 @@ https://github.com/joaotavora/eglot/issues/1258"
        :disableLineTextInReferences                           :json-false))
 		 )
    )
+
+  ;; Prepend after TypeScript: JSON modes can inherit from js-mode.
+  ;; Put JSONC first so its json-mode parent doesn't give it the wrong ID.
+  (add-to-list
+   'eglot-server-programs
+   '(((jsonc-mode :language-id "jsonc")
+      (json-mode :language-id "json")
+      (json-ts-mode :language-id "json")
+      (js-json-mode :language-id "json"))
+     "vscode-json-language-server" "--stdio"
+     :initializationOptions (:provideFormatter t)))
+
+  ;; Eglot also uses mode inheritance to reuse running servers, without
+  ;; consulting eglot-server-programs.  Don't let an existing TS server
+  ;; claim JSON buffers through their js-mode ancestry.
+  (defun my/eglot-json-language-id (language-id)
+    "Reject non-JSON servers for JSON buffers."
+    (unless (and (derived-mode-p 'json-mode 'json-ts-mode 'jsonc-mode 'js-json-mode)
+                 (not (member language-id '("json" "jsonc"))))
+      language-id))
+  (advice-add 'eglot--languageId :filter-return #'my/eglot-json-language-id)
 
   ;; File watching.  On macOS every watch costs a file descriptor (kqueue),
   ;; and a directory watch cannot even see edits to files inside it, so

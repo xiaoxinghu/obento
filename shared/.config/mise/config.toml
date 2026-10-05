@@ -38,9 +38,9 @@ herdr = "latest"           # agent multiplexer (herdr.dev)
 "cargo:raine/workmux" = "latest"
 
 # language servers (editor-agnostic; used by eglot etc.)
-# tsls has no runtime `typescript` dep, so install it too; point eglot at it
-# via tsserver.path -> ~/.local/share/mise/installs/npm-typescript/latest/lib/node_modules/typescript/lib
+# Eglot uses TypeScript's native `tsc --lsp`; keep tsls for other clients.
 "npm:typescript-language-server" = "latest"
 "npm:typescript" = "latest"
+"npm:vscode-langservers-extracted" = "latest" # JSON/JSONC (also HTML/CSS/ESLint)
 pnpm = "12.5.1"
 codex = "latest"
