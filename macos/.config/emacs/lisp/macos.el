@@ -56,8 +56,9 @@
 (use-package emacs-everywhere)
 
 (use-package launcher
-	:commands (launcher)
-  :load-path "~/workspace/launcher.el")
+  :ensure nil
+  :load-path "/Users/xiaoxing/workspace/launcher.el/"
+  :commands (launcher launcher-refresh))
 
 (use-package present
 	:demand t
