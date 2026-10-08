@@ -164,4 +164,17 @@
 (use-package links
   :load-path "~/workspace/links.el")
 
+(use-package task
+	:ensure nil
+	:commands (task-list task-add task-claim task-done task-visit task-visit-worktree
+							task-finish task-finish-all)
+	:config
+	(evil-define-key 'normal task-list-mode-map
+		(kbd "RET") #'task-visit
+		"a" #'task-add
+		"c" #'task-claim
+		"d" #'task-done
+		"w" #'task-visit-worktree
+		"x" #'task-finish
+		"X" #'task-finish-all))
 (provide 'tools)

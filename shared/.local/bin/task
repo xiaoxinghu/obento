@@ -15,7 +15,20 @@ USAGE
   task [-d <dir>] <command> [args]
 
 COMMANDS
-  list                     Show every task with its state.
+  list [--tsv]             Show every task with its state, and notes on its
+                           branch and worktree that may need you.
+                             --tsv  one line per task for scripts and
+                                    editors, with tab-separated columns:
+                                    1 state
+                                    2 ID
+                                    3 title
+                                    4 unmet blockers, separated by spaces
+                                    5 branch: new (no commits yet), ahead
+                                      (commits not on main), merged, or
+                                      empty when there is no task/<id>
+                                    6 worktree path, if it has one
+                                    7 worktree: clean, dirty or missing
+                                    8 note, as list shows it
   ready                    Print the IDs of all ready tasks.
   next                     Print the ID of the first ready task.
   add [-p <parent>] [-b <id>]... [-F <file>] <title>
@@ -29,6 +42,20 @@ COMMANDS
                            task/<id> and its worktree; prints the worktree path.
   done [<id>]              Set status: done in the task file. Without <id>,
                            uses the task of the current task/<id> branch.
+                           A claimed task is done only on its own branch.
+  path [<id>]              Print the absolute path of the task file in this
+                           worktree, then the README.md of each folder above
+                           it, from the top down. Without <id>, uses the
+                           task of the current task/<id> branch.
+  finish [--force] <id>... Clean up after a task's merge: remove its worktree
+                           and delete task/<id>. A task its merge left todo
+                           is marked done on main, uncommitted. Refuses when
+                           the branch has commits that aren't on main, or
+                           none yet, or the worktree has uncommitted changes.
+                             --force  drop that work too. An unfinished task
+                                      is ready again.
+  finish --all             Finish every task whose branch is merged and whose
+                           worktree has no uncommitted changes.
   help                     Show this manual.
 
 OPTIONS
@@ -70,15 +97,26 @@ STATES
   once its branch is merged. next picks in path order, so the NN- prefixes
   set priority.
 
+  list notes what may need you:
+    merged, but not done on main    the branch merged without task done
+    done on its branch, not merged  waiting for its merge
+    branch remains                  done, but task/<id> is not cleaned up
+    no worktree / worktree is gone  claimed, with no usable worktree
+    uncommitted changes             in its worktree
+
+  "merged" means the branch has commits since it was claimed, all of them
+  on main. A squash or rebase merge leaves the branch "ahead".
+
 WORKFLOW FOR AGENTS
   1. cd "$(task claim)"          claim the next ready task, enter its worktree
-  2. Read the task file and every README.md in the folders above it.
+  2. Read the files task path prints: the task file, then every README.md
+     in the folders above it.
   3. Do the work; commit on the task/<id> branch.
   4. task done && git commit -am "done: <id>"
-  5. Get task/<id> merged into main, then from the main worktree:
-       git worktree remove <worktree-path> && git branch -d task/<id>
+  5. Get task/<id> merged into main, then outside its worktree:
+       task finish <id>
 
-  To drop a task unfinished, do the same cleanup with git branch -D.
+  To drop a task unfinished: task finish --force <id>
   New tasks must be committed on main before they can be claimed.
 
 EXAMPLES
@@ -93,6 +131,7 @@ EXAMPLES
   BODY
   task list                                          see what is blocked and why
   task claim auth/02-logout-button                   claim a specific task
+  task path                                          files to read for this branch's task
   task -d .scratch/plan next                         use another tasks folder
   TASK_WORKTREES=~/wt task claim                     put worktrees elsewhere
 
@@ -145,7 +184,7 @@ fm {
   else if (key == "ordered") ordered[id] = (v == "true")
   next
 }
-!titled && /^# / { title[id] = substr($0, 3); titled = 1 }
+!titled && /^# / { title[id] = substr($0, 3); gsub(/\t/, " ", title[id]); titled = 1 }
 END {
   for (i = 1; i <= n; i++)  # link each node to its previous sibling (input is sorted)
     for (x = ids[i]; x != ""; x = p) {
@@ -176,10 +215,67 @@ scan() {
     awk -v root="$root" "$SCAN" - ${files[@]+"${files[@]}"}
 }
 
+# One line per task branch: id \t branch \t status on the branch \t worktree \t worktree state
+facts() {
+  local head wts id ref created b status wt ws line
+  head=$(git -C "$mainwt" rev-parse -q --verify HEAD 2>/dev/null) || return 0
+  wts=$(git worktree list --porcelain | awk '
+    /^worktree / { p = substr($0, 10); m = 0 }
+    /^branch refs\/heads\/task\// { b = substr($0, 24) }
+    /^prunable/ { m = 1 }
+    /^$/ { if (b != "") print b "\t" p "\t" m; b = "" }
+    END { if (b != "") print b "\t" p "\t" m }')
+  git for-each-ref --format='%(refname:strip=3)' refs/heads/task/ | while IFS= read -r id; do
+    ref=refs/heads/task/$id
+    created=$(git log -g --format=%H "$ref" -- 2>/dev/null | tail -1)
+    if (($(git rev-list --count "$head..$ref"))); then b=ahead
+    elif [[ "$(git rev-parse "$ref")" == "$created" ]]; then b=new
+    else b=merged; fi
+    status=""
+    if [[ "$root" == "$mainwt"/* ]]; then
+      status=$(git show "$ref:${root#"$mainwt"/}/$id.md" 2>/dev/null |
+        awk 'NR == 1 && $0 != "---" { exit } NR > 1 && $0 == "---" { exit }
+             /^status:/ { sub(/^status:[ \t]*/, ""); sub(/[ \t]+#.*/, ""); gsub(/"/, ""); print; exit }')
+    fi
+    line=$(awk -F'\t' -v id="$id" '$1 == id' <<< "$wts")
+    wt="" ws=""
+    if [[ -n "$line" ]]; then
+      wt=$(cut -f2 <<< "$line")
+      if [[ "$(cut -f3 <<< "$line")" == 1 || ! -d "$wt" ]]; then ws=missing
+      elif [[ -n "$(git -C "$wt" status --porcelain)" ]]; then ws=dirty
+      else ws=clean; fi
+    fi
+    printf '%s\t%s\t%s\t%s\t%s\n' "$id" "$b" "$status" "$wt" "$ws"
+  done
+}
+
+# scan, with each task's branch, worktree, worktree state and note: see list --tsv
+report() {
+  awk -F'\t' -v OFS='\t' '
+    function add(s) { note = note (note != "" ? "; " : "") s }
+    FILENAME == ARGV[1] { br[$1] = $2; bs[$1] = $3; wt[$1] = $4; ws[$1] = $5; next }
+    { id = $2; note = ""
+      if (id in br) {
+        if ($1 == "claimed" && br[id] == "merged") add("merged, but not done on main")
+        if ($1 == "claimed" && br[id] == "ahead" && bs[id] == "done") add("done on its branch, not merged")
+        if ($1 == "done" || $1 == "wontfix") add("branch remains")
+        if ($1 == "claimed" && wt[id] == "") add("no worktree")
+        if (ws[id] == "missing") add("worktree is gone")
+        if (ws[id] == "dirty") add("uncommitted changes")
+      }
+      print $1, $2, $3, $4, br[id], wt[id], ws[id], note }' <(facts) <(scan)
+}
+
 cmd_list() {
-  scan | awk -F'\t' '{ b = $4; gsub(/ /, ", ", b)
-                       printf "%-8s %s%s%s\n", $1, $2, ($3 != "" ? "  " $3 : ""),
-                              ($1 == "blocked" ? "  (blocked by " b ")" : "") }'
+  if (($#)); then
+    [[ "$1" == --tsv && $# == 1 ]] || usage_error "list takes no arguments but --tsv"
+    report
+    return
+  fi
+  report | awk -F'\t' '{ b = $4; gsub(/ /, ", ", b)
+                         printf "%-8s %s%s%s%s\n", $1, $2, ($3 != "" ? "  " $3 : ""),
+                                ($1 == "blocked" ? "  (blocked by " b ")" : ""),
+                                ($8 != "" ? "  [" $8 "]" : "") }'
 }
 
 cmd_next() {
@@ -266,41 +362,128 @@ cmd_claim() {
   echo "$dir"
 }
 
-cmd_done() {
-  local id=${1:-} b f
-  (($# <= 1)) || usage_error "done takes at most one task id"
-  if [[ -z "$id" ]]; then
-    b=$(git branch --show-current 2>/dev/null || true)
-    [[ "$b" == task/* ]] || usage_error "not on a task/<id> branch, so pass the id: task done <id>"
-    id=${b#task/}
-  fi
-  # Edit this worktree's copy so the change lands with the task's merge.
+# The ID of the current task/<id> branch, for <command> called without one.
+branch_task() {
+  local b
+  b=$(git branch --show-current 2>/dev/null || true)
+  [[ "$b" == task/* ]] || usage_error "not on a task/<id> branch, so pass the id: task $1 <id>"
+  echo "${b#task/}"
+}
+
+# The file of task <id> in this worktree: the copy that lands with the task's merge.
+task_file() {
+  local f
   if [[ -n "$mainwt" && "$root" == "$mainwt"/* ]]; then
-    f="$(git rev-parse --show-toplevel)/${root#"$mainwt"/}/$id.md"
+    f="$(git rev-parse --show-toplevel)/${root#"$mainwt"/}/$1.md"
   else
-    f="$root/$id.md"
+    f="$root/$1.md"
   fi
-  [[ -f "$f" ]] || die "no task file for $id at $f. See the IDs in: task list"
-  [[ "$(head -1 "$f")" == "---" ]] || die "$f has no frontmatter; add a status: line between --- lines"
+  [[ -f "$f" && "$1" != README && "$1" != */README ]] ||
+    die "no task file for $1 at $f. See the IDs in: task list"
+  echo "$f"
+}
+
+# Set status: done in task file <file>.
+set_done() {
+  [[ "$(head -1 "$1")" == "---" ]] || die "$1 has no frontmatter; add a status: line between --- lines"
   awk 'NR == 1 { fm = 1; print; next }
        fm && /^status:/ { if (!s) print "status: done"; s = 1; next }
        fm && $0 == "---" { if (!s) print "status: done"; fm = 0 }
-       { print }' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+       { print }' "$1" > "$1.tmp" && mv "$1.tmp" "$1"
+}
+
+cmd_done() {
+  local id=${1:-} f
+  (($# <= 1)) || usage_error "done takes at most one task id"
+  [[ -n "$id" ]] || id=$(branch_task "done")
+  # Elsewhere, done would count before the merge and leave the branch's copy todo.
+  if git show-ref -q --verify "refs/heads/task/$id" &&
+     [[ "$(git branch --show-current 2>/dev/null)" != "task/$id" ]]; then
+    die "$id is claimed, so mark it done on its branch task/$id, in its worktree. Once that branch is merged, task finish $id cleans up."
+  fi
+  f=$(task_file "$id")
+  set_done "$f"
   echo "$id"
+}
+
+cmd_finish() {
+  local force=0 all=0 ids=() rows id line state branch wt ws here marked
+  while (($#)); do
+    case "$1" in
+      --force) force=1 ;;
+      --all)   all=1 ;;
+      -*)      usage_error "unknown option for finish: $1" ;;
+      *)       ids+=("$1") ;;
+    esac
+    shift
+  done
+  [[ -n "$mainwt" ]] || die "not in a git repo; tasks are claimed with git branches"
+  rows=$(report)
+  if ((all)); then
+    ((!force && ${#ids[@]} == 0)) || usage_error "finish --all takes no ids, and no --force"
+    while IFS= read -r id; do ids+=("$id"); done < <(awk -F'\t' '$5 == "merged" && $7 != "dirty" { print $2 }' <<< "$rows")
+    ((${#ids[@]})) || { echo "task: nothing to finish" >&2; return 0; }
+  fi
+  ((${#ids[@]})) || usage_error "finish needs a task id, or --all"
+  here=$(pwd -P)
+  for id in "${ids[@]}"; do
+    line=$(awk -F'\t' -v id="$id" '$2 == id' <<< "$rows")
+    [[ -n "$line" ]] || die "unknown task: $id. See the IDs in: task list"
+    state=$(cut -f1 <<< "$line") branch=$(cut -f5 <<< "$line")
+    wt=$(cut -f6 <<< "$line") ws=$(cut -f7 <<< "$line")
+    [[ -n "$branch" ]] || die "$id is not claimed: there is no branch task/$id to finish"
+    if ((!force)); then
+      case "$branch" in
+        new)   die "task/$id has no commits yet. To release $id anyway: task finish --force $id" ;;
+        ahead) die "task/$id has commits that aren't on main; merge them first. To drop them: task finish --force $id" ;;
+      esac
+      [[ "$ws" != dirty ]] || die "$id's worktree has uncommitted changes: $wt. To drop them: task finish --force $id"
+    fi
+    if [[ -n "$wt" && "$ws" != missing ]]; then
+      [[ "$here/" != "$(cd "$wt" && pwd -P)/"* ]] || die "you are inside $id's worktree; run task finish from elsewhere"
+      if ((force)); then git worktree remove --force "$wt"; else git worktree remove "$wt"; fi
+    elif [[ "$ws" == missing ]]; then
+      git worktree prune
+    fi
+    git branch -D -q "task/$id"
+    marked=""
+    if [[ "$state" == claimed && "$branch" == merged ]]; then
+      set_done "$root/$id.md"
+      marked=", marked done on main (uncommitted)"
+    fi
+    echo "$id: ${wt:+removed its worktree, }deleted task/$id$marked"
+  done
+}
+
+cmd_path() {
+  local id=${1:-} f base dir="" part
+  (($# <= 1)) || usage_error "path takes at most one task id"
+  [[ -n "$id" ]] || id=$(branch_task path)
+  f=$(task_file "$id")
+  echo "$f"
+  base=${f%"/$id.md"}
+  if [[ -f "$base/README.md" ]]; then echo "$base/README.md"; fi
+  while [[ "$id" == */* ]]; do  # each folder above the task, from the top down
+    part=${id%%/*}; id=${id#*/}
+    dir+="${dir:+/}$part"
+    if [[ -f "$base/$dir/README.md" ]]; then echo "$base/$dir/README.md"; fi
+  done
 }
 
 cmd=${1:-}
 (($#)) && shift
 case "$cmd" in
-  list|ready|next) (($# == 0)) || usage_error "$cmd takes no arguments" ;;
+  ready|next) (($# == 0)) || usage_error "$cmd takes no arguments" ;;
 esac
 case "$cmd" in
-  list)  cmd_list ;;
+  list)  cmd_list "$@" ;;
   ready) scan | awk -F'\t' '$1 == "ready" { print $2 }' ;;
   next)  cmd_next ;;
   add)   cmd_add "$@" ;;
   claim) cmd_claim "$@" ;;
   done)  cmd_done "$@" ;;
+  path)  cmd_path "$@" ;;
+  finish) cmd_finish "$@" ;;
   help|-h|--help) usage ;;
   "")    usage_error "missing command" ;;
   *)     usage_error "unknown command: $cmd" ;;
