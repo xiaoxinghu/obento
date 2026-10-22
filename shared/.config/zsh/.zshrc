@@ -33,9 +33,6 @@ compinit -C
 zmodload zsh/complist
 zstyle ':completion:*' menu select
 
-# (Optional) Jump straight into the menu on first Tab
-bindkey '^I' menu-select   # ^I is Tab
-
 # ============================================================================
 # Zsh plugins via antidote (cross-platform; replaces the Homebrew formulae).
 # Clones antidote + plugins into XDG data dir, rebuilds a static bundle into the
@@ -61,7 +58,7 @@ HISTFILE=~/.config/zsh/.histfile
 HISTSIZE=1000
 SAVEHIST=1000
 setopt autocd
-bindkey -v
+bindkey -e
 # End of lines configured by zsh-newuser-install
 # The following lines were added by compinstall
 zstyle :compinstall filename "${ZDOTDIR:-$HOME/.config/zsh}/.zshrc"
@@ -92,6 +89,7 @@ alias ta="tmux a"
 alias s='sesh connect "$(sesh list | gum filter --limit 1 --placeholder "Pick a sesh" --prompt="⚡")"'
 alias g="lazygit"
 alias e="emacsclient"
+alias c="claude --dangerously-skip-permissions"
 alias man="batman"
 
 # ============================================================================
@@ -126,6 +124,21 @@ bindkey '^[[B' history-substring-search-down
 export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
 zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
 source <(carapace _carapace)
+
+# Report the directory (OSC 7) from shells inside tmux, which passes it on to
+# the outer terminal. Ghostty's own shell integration only loads outside tmux.
+if [[ -n $TMUX ]]; then
+  _tmux_osc7() {
+    emulate -L zsh; setopt localoptions nomultibyte
+    local out= c
+    for c in ${(s::)PWD}; do
+      [[ $c == [A-Za-z0-9/_.~-] ]] && out+=$c || out+=$(printf '%%%02X' "'$c")
+    done
+    print -n -- "\e]7;file://${HOST}${out}\a"
+  }
+  autoload -Uz add-zsh-hook
+  add-zsh-hook precmd _tmux_osc7
+fi
 
 zedz() {
   local dir
