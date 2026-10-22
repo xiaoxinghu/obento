@@ -3,7 +3,7 @@
 (use-package org
 	:ensure nil
 	:custom
-	(org-directory my/org-location)
+	(org-directory my/files-location)
 	(org-src-preserve-indentation t)
 	(org-pretty-entities-include-sub-superscripts nil)
 	(org-goto-interface 'outline-path-completion)
@@ -54,7 +54,7 @@
 			"* TODO %?[[%:link][%:description]] %U\n%i\n")
 		 ("l" "Links"
       entry
-      (file ,(expand-file-name "links.org" my/org-location))
+      (file ,(expand-file-name "links.org" my/files-location))
       "* TODO [[%:link][%:description]]\n\
 :PROPERTIES:\n\
 :CREATED:  %U\n\
@@ -62,12 +62,12 @@
 %?\n"
       :empty-lines 1)
 		 ;; ("j" "Journal" entry
-		 ;;  (file+olp+datetree ,(expand-file-name "journal.org" my/org-location))
+		 ;;  (file+olp+datetree ,(expand-file-name "journal.org" my/files-location))
 		 ;;  "* %<%Y-%m-%d %H:%M> \n\n%?"
 		 ;;  ;; :tree-type week
 		 ;;  )
 		 ;; ("J" "Journal on a date" entry
-		 ;;  (file+olp+datetree ,(expand-file-name "journal.org" my/org-location))
+		 ;;  (file+olp+datetree ,(expand-file-name "journal.org" my/files-location))
 		 ;;  "* %<%Y-%m-%d %H:%M> \n\n%?"
 		 ;;  ;; :tree-type week
 		 ;;  :time-prompt t
@@ -263,7 +263,7 @@ _SPC_ send        _q_ quit
 ;; --- notes ----
 (use-package denote
   :custom
-  (denote-directory my/org-location)
+  (denote-directory my/files-location)
   (denote-prompts '(title keywords))
 	;; (denote-file-type 'text)
   ;; (denote-journal-extras-title-format 'day-date-month-year)
@@ -299,8 +299,8 @@ _j_ journal    _a_ agenda
   ("n" consult-notes :color blue)
   ("SPC" (find-file my/now-file) :color blue)
   ("a" org-agenda :color blue)
-  ("f" (affe-find my/org-location) :color blue)
-  ("s" (affe-grep my/org-location) :color blue)
+  ("f" (affe-find my/files-location) :color blue)
+  ("s" (affe-grep my/files-location) :color blue)
   ("j" denote-journal-extras-new-or-existing-entry :color blue)
   ("l" denote-insert-link :color blue)
   ;; ("t" org-roam-dailies-goto-today "Today" :color blue)
@@ -319,7 +319,7 @@ _j_ journal    _a_ agenda
 
 (use-package consult-notes
   :config
-  ;; (setq consult-notes-file-dir-sources `(("Notes" ?n ,my/org-location)))
+  ;; (setq consult-notes-file-dir-sources `(("Notes" ?n ,my/files-location)))
   (when (locate-library "denote")
     (consult-notes-denote-mode))
 	;; search only for text files in denote dir

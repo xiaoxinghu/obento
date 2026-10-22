@@ -11,9 +11,10 @@
 (defcustom my/light-theme 'ef-frost
   "My default light theme")
 
-(defcustom my/org-location (expand-file-name "~/life")
-  "My org root location")
-(defcustom my/now-file (expand-file-name "now.org" my/org-location)
+(defcustom my/files-location (expand-file-name "~/files")
+  "My files root location")
+
+(defcustom my/now-file (expand-file-name "now.org" my/files-location)
   "My one file")
 
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))

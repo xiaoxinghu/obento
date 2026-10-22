@@ -156,7 +156,7 @@
 (use-package doing
   :load-path "~/workspace/doing.el"
 	:custom
-	(doing-directory my/org-location)
+	(doing-directory my/files-location)
 	(evil-define-key 'normal 'global
 		(kbd "<leader>d") doing-command-map)
 	)
