@@ -30,6 +30,26 @@
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
 
+;; `:local DIR' loads a package from my checkout when DIR exists, in place
+;; of `:vc' or `:ensure'.  Without DIR and without `:vc', the package is skipped.
+(add-to-list 'use-package-keywords :local)
+
+(defun use-package-normalize/:local (_name keyword args)
+  (use-package-only-one (symbol-name keyword) args
+    (lambda (_label arg)
+      (if (stringp arg) arg (use-package-error ":local wants a directory")))))
+
+(defun use-package-handler/:local (name _keyword dir rest state)
+  (cond
+   ((file-directory-p dir)
+    (dolist (kw '(:pin :ensure :vc))
+      (setq rest (use-package-plist-delete rest kw)))
+    (use-package-concat
+     `((add-to-list 'load-path ,(expand-file-name dir)))
+     (use-package-process-keywords name rest state)))
+   ((plist-member rest :vc)
+    (use-package-process-keywords name rest state))))
+
 (use-package exec-path-from-shell
   :demand t
   :config

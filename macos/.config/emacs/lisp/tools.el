@@ -195,7 +195,7 @@
 ;; 	:vc (:url "https://github.com/xiaoxinghu/doing.el" :rev :newest))
 
 (use-package doing
-  :load-path "~/workspace/doing.el"
+  :local "~/workspace/doing.el"
 	:custom
 	(doing-directory my/files-location)
 	(evil-define-key 'normal 'global
@@ -203,7 +203,7 @@
 	)
 
 (use-package links
-  :load-path "~/workspace/links.el")
+  :local "~/workspace/links.el")
 
 (use-package task
 	:ensure nil

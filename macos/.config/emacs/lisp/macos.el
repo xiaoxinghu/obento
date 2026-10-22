@@ -57,14 +57,14 @@
 
 (use-package launcher
 	:commands (launcher)
-  :load-path "~/workspace/launcher.el")
+  :local "~/workspace/launcher.el")
 
 (use-package present
 	:demand t
-  :load-path "~/workspace/present.el")
+  :local "~/workspace/present.el")
 
 (use-package commander
 	:demand t
-  :load-path "~/workspace/commander.el")
+  :local "~/workspace/commander.el")
 
 (provide 'macos)
