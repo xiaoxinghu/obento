@@ -150,6 +150,47 @@
 ;; 	(auth-source-pass-enable))
 
 (use-package password-store)
+
+;; Show keys and the commands they run, for screencasts (see rec/).
+(use-package keycast
+  :commands (my/keycast-mode my/keycast-toggle-command)
+  :config
+  (defcustom my/keycast-width 40
+    "Columns `my/keycast-mode' takes, so the mode line never shifts.")
+  (defcustom my/keycast-key-width 16
+    "Columns `my/keycast-mode' takes when the command is hidden.")
+  (defcustom my/keycast-show-command t
+    "Whether `my/keycast-mode' shows the command after the key.")
+
+  (defun my/keycast-toggle-command ()
+    "Show or hide the command after the key in `my/keycast-mode'."
+    (interactive)
+    (setq my/keycast-show-command (not my/keycast-show-command))
+    (force-mode-line-update t))
+
+  (define-minor-mode my/keycast-mode
+    "Show the last key and command at the start of doom-modeline's right side."
+    :global t
+    (if my/keycast-mode
+        (progn (add-hook 'post-command-hook #'keycast--update t)
+               (add-hook 'post-command-hook #'force-mode-line-update t)
+               (add-hook 'minibuffer-exit-hook #'keycast--minibuffer-exit t))
+      (remove-hook 'post-command-hook #'keycast--update)
+      (remove-hook 'post-command-hook #'force-mode-line-update)
+      (remove-hook 'minibuffer-exit-hook #'keycast--minibuffer-exit))
+    (force-mode-line-update t))
+
+  (with-eval-after-load 'doom-modeline
+    (doom-modeline-def-segment keycast
+      (when (and my/keycast-mode (doom-modeline--active))
+        (if my/keycast-show-command
+            (truncate-string-to-width (keycast-format " %k%c%R")
+                                      my/keycast-width nil ?\s "…")
+          (truncate-string-to-width (keycast-format " %k%R")
+                                    my/keycast-key-width nil ?\s "…"))))
+    (doom-modeline-remove-segment 'keycast)
+    (doom-modeline-add-segment 'keycast 'compilation :before)))
+
 ;; (use-package doing
 ;; 	:vc (:url "https://github.com/xiaoxinghu/doing.el" :rev :newest))
 
