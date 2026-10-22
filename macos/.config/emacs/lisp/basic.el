@@ -33,7 +33,7 @@
 (use-package exec-path-from-shell
   :demand t
   :config
-  (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH" "ASPELL_CONF" "DICPATH" "CFLAGS" "LDFLAGS" "PKG_CONFIG_PATH"))
+  (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH" "ASPELL_CONF" "DICPATH" "CFLAGS" "LDFLAGS" "PKG_CONFIG_PATH" "XDG_DATA_HOME" "XDG_CONFIG_HOME" "XDG_CACHE_HOME"))
     (add-to-list 'exec-path-from-shell-variables var))
   (exec-path-from-shell-initialize)
   (if (and (fboundp 'native-comp-available-p)
@@ -60,9 +60,12 @@
 	:demand t
 	:config
 	(no-littering-theme-backups)
+	;; sha1 keeps names short; flattening with `!' exceeds macOS NAME_MAX on deep pnpm paths
+	(setq auto-save-file-name-transforms
+				`((".*" ,(no-littering-expand-var-file-name "auto-save/") sha1)))
 	(let ((dir (no-littering-expand-var-file-name "lock-files/")))
 		(make-directory dir t)
-		(setq lock-file-name-transforms `((".*" ,dir t))))
+		(setq lock-file-name-transforms `((".*" ,dir sha1))))
 	(require 'recentf)
 	(add-to-list 'recentf-exclude
 							 (recentf-expand-file-name no-littering-var-directory))
