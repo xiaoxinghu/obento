@@ -42,7 +42,10 @@
 (use-package evil-commentary
   :demand t
   :after evil
-  :config (evil-commentary-mode 1))
+  :config
+  (evil-commentary-mode 1)
+  ;; s-/ is `ghost-ask'; gc comments.
+  (keymap-unset evil-commentary-mode-map "s-/" t))
 
 (use-package evil-snipe
   :demand t
@@ -100,7 +103,7 @@
   ("y" yank-location "yank location" :color blue)
   ("r" consult-recent-file "recent files" :color blue)
   ("c" (find-file (expand-file-name "init.el" user-emacs-directory)) "open config" :color blue)
-  ("R" my/reload-config "reload config" :color blue)
+  ("R" restart-emacs "restart emacs" :color blue)
   ("q" nil))
 
 (evil-define-key 'normal 'global
