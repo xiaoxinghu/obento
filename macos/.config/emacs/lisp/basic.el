@@ -9,8 +9,7 @@
 (setq use-package-always-defer t)
 
 ;; (setenv "GPG_TTY" "$(tty)")
-(require 'epa-file)
-(epa-file-enable)
+;; .gpg files: epa-hook, preloaded, loads epa-file when one is visited
 (setenv "GPG_AGENT_INFO" nil)
 (setq epg-gpg-program "/run/current-system/sw/bin/gpg")
 (setq epg-pinentry-mode 'loopback)
