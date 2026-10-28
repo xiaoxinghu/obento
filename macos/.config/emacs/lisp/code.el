@@ -2,8 +2,9 @@
 
 (setq sgml-basic-offset 'tab)
 
-(setopt treesit-enabled-modes t
-        treesit-auto-install-grammar 'always)
+;; not `setopt': it loads cus-edit; this runs the :set functions all the same
+(custom-set-variables '(treesit-enabled-modes t)
+                      '(treesit-auto-install-grammar 'always))
 
 (add-hook 'python-mode-hook
 					(lambda ()
