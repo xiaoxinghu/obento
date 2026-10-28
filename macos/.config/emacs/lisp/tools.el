@@ -214,7 +214,9 @@
 (use-package portal
   :local "~/code/github.com/xiaoxinghu/portal"
   :vc (:url "https://github.com/xiaoxinghu/portal" :rev :newest)
-	:demand t
+	;; once idle: portal-web loads url and browse-url; s-t and Command-Space
+	;; are there a second after the frame
+	:defer 1
   :bind (("s-p" . hydra-portal/body))
 	:custom
 	(portal-terminal-theme "Catppuccin Mocha")
