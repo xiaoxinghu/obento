@@ -42,6 +42,13 @@ if command -v mise >/dev/null 2>&1; then
   mise install -y
 fi
 
+# ----- emacs environment -----
+# Emacs reads PATH from ~/.env.el instead of starting a shell; write it now that
+# the shell config is linked and mise's tools are installed.
+if [[ "$PLATFORM" == "macos" ]] && command -v emacs >/dev/null 2>&1; then
+  "$REPO/macos/.config/emacs/env.sh"
+fi
+
 # ----- github ssh key -----
 # Give this machine its own SSH key on GitHub (per-machine, never shared). The
 # first run does a one-time web/device login; re-runs skip whatever is already

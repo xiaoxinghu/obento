@@ -60,19 +60,15 @@
    ((plist-member rest :vc)
     (use-package-process-keywords name rest state))))
 
-(use-package exec-path-from-shell
-  :demand t
-  :config
-  (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH" "ASPELL_CONF" "DICPATH" "CFLAGS" "LDFLAGS" "PKG_CONFIG_PATH" "XDG_DATA_HOME" "XDG_CONFIG_HOME" "XDG_CACHE_HOME"))
-    (add-to-list 'exec-path-from-shell-variables var))
-  (exec-path-from-shell-initialize)
-  (if (and (fboundp 'native-comp-available-p)
+;; PATH and the shell's variables come from ~/.env.el, written by env.sh and
+;; loaded in early-init.el, so no shell runs at startup.
+(if (and (fboundp 'native-comp-available-p)
 					 (native-comp-available-p))
       (progn
 				(message "Native comp is available")
 	  ;;; Using Emacs.app/Contents/MacOS/bin since it was compiled with
 	  ;;; ./configure --prefix="$PWD/nextstep/Emacs.app/Contents/MacOS"
-	  ;;; Append to path to give priority to values from exec-path-from-shell-initialize.
+	  ;;; Append to path to give priority to values from ~/.env.el.
 				(add-to-list 'exec-path (concat invocation-directory (file-name-as-directory "bin")) t)
 				(setenv "LIBRARY_PATH" (concat (getenv "LIBRARY_PATH")
 																			 (when (getenv "LIBRARY_PATH")
@@ -83,7 +79,7 @@
 	  ;;; Only set after LIBRARY_PATH can find gcc libraries.
 				(setq comp-deferred-compilation t)
 				(setq comp-speed 3))
-    (message "Native comp is *not* available")))
+    (message "Native comp is *not* available"))
 
 
 (use-package no-littering
