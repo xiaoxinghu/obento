@@ -177,9 +177,8 @@ _SPC_ send        _q_ quit
 ;; Got this from [[https://wohanley.com/posts/org-setup/][this post]].
 
 ;; (setq my/org-agenda-directory (expand-file-name "todo" org-directory))
-(require 'find-lisp)
-
 (defun my/find-org-files (directory)
+  (require 'find-lisp)
   (find-lisp-find-files directory "\.org$"))
 
 (defun who-org/agenda-files-update (&rest _)
