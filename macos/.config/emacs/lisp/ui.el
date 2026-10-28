@@ -111,6 +111,7 @@
         global-hl-line-sticky-flag nil))
 
 (use-package modus-themes
+  :ensure nil
   ;; :disabled t
   :init
   ;; Set theme vars immediately so the appearance-change hook works

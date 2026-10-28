@@ -269,6 +269,7 @@ the repository's git directory, so the same range reopens with its marks."
 					'executable-make-buffer-file-executable-if-script-p)
 
 (use-package editorconfig
+  :ensure nil
   :custom
   (editorconfig-exclude-modes '(org-mode))
   :hook (after-init . editorconfig-mode))

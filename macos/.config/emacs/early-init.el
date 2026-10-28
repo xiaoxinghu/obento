@@ -14,6 +14,13 @@
 (when (file-exists-p my/env-path)
   (load my/env-path))
 
+;; one autoloads file instead of activating each package; where no-littering
+;; puts it, which loads too late for this.  M-x package-quickstart-refresh
+;; after changing packages by hand.
+(setq package-quickstart t
+      package-quickstart-file
+      (expand-file-name "var/package-quickstart.el" user-emacs-directory))
+
 ;; this is for speed up the start up, will be reset by gcmh later
 (setq gc-cons-threshold most-positive-fixnum)
 
