@@ -2,12 +2,14 @@
 # obento 🍱 — manage this dotfiles/tools repo.
 #
 #   obento update        git pull + re-run setup.sh (aborts on conflicts)
-#   obento add <path>    move a config into the current platform and stow it
-#   obento move <dest>   move this repo to <dest> and repoint every stow link
+#   obento link          link shared + this platform's package into $HOME
+#   obento add <path>    move a config into the current platform and link it
+#   obento move <dest>   move this repo to <dest> and repoint every link
 #
 # Finds the repo via $OBENTO_PATH (set by setup.sh); falls back to resolving
-# this script's own location, since it's stowed from <repo>/shared/.local/bin.
+# this script's own location, since it's linked from <repo>/shared/.local/bin.
 set -euo pipefail
+export LC_ALL=C # one sort order for sort and comm
 
 resolve_repo() {
   if [[ -n "${OBENTO_PATH:-}" ]]; then
@@ -33,12 +35,82 @@ platform() {
 }
 
 REPO="$(resolve_repo)"
+PKGS=(shared "$(platform)")
 
 cmd_update() {
   echo "Updating obento in $REPO..."
   git -C "$REPO" pull --ff-only ||
     { echo "obento: git pull failed (conflicts/dirty tree?). Aborting." >&2; exit 1; }
   "$REPO/setup.sh"
+}
+
+# Is link $1 ours: does it point at <pkg>/<its path under $HOME>, wherever the
+# repo lives or used to live? That covers stow's relative links too.
+ours() {
+  local l k
+  l="$(readlink "$1")" || return 1
+  for k in "${PKGS[@]}"; do [[ "$l" == */"$k/${1#"$HOME"/}" ]] && return 0; done
+  return 1
+}
+
+# Move $1 out of the way to $1.obento-bak[N]. Nothing that isn't ours is deleted.
+aside() {
+  local n=""
+  while [[ -e "$1.obento-bak$n" || -L "$1.obento-bak$n" ]]; do n=$((n + 1)); done
+  mv "$1" "$1.obento-bak$n"
+  echo "moved aside: $1.obento-bak$n" >&2
+}
+
+# Link every file git sees in the packages (tracked or untracked, minus ignored)
+# into $HOME, one link per file inside real dirs. A dir with its own .gitignore
+# is linked whole instead: the app writes runtime state there, and that
+# .gitignore keeps it out of git.
+# Safe to re-run over any state: links into the packages are repointed, parent
+# dirs that are links into the packages (stow's folds) are split into real dirs,
+# and anything else in the way is moved aside. Links the last run made that are
+# no longer wanted are removed; that list lives in .git, so it moves with the repo.
+cmd_link() {
+  local state="$REPO/.git/obento-links" files want f w t p c whole=()
+  files="$(git -C "$REPO" ls-files -co --exclude-standard -- "${PKGS[@]/%//.*}")"
+  while IFS= read -r f; do
+    [[ "$f" == */*/.gitignore ]] && whole+=("${f%/.gitignore}")
+  done <<<"$files"
+  want="$(while IFS= read -r f; do
+    [[ -e "$REPO/$f" ]] || continue # deleted, not yet committed
+    for w in ${whole[@]+"${whole[@]}"}; do [[ "$f" == "$w"/* ]] && f="$w"; done
+    echo "$f"
+  done <<<"$files" | sort -u)"
+
+  if [[ -f "$state" ]]; then
+    comm -23 "$state" - <<<"$want" | while IFS= read -r f; do
+      t="$HOME/${f#*/}"
+      if [[ -L "$t" ]] && ours "$t"; then rm "$t" && echo "unlink $t"; fi
+    done
+  fi
+
+  while IFS= read -r f; do
+    [[ -n "$f" ]] || continue
+    t="$HOME/${f#*/}"
+    [[ "$(readlink "$t")" == "$REPO/$f" ]] && continue
+    p="$HOME" c="${f#*/}"
+    while [[ "$c" == */* ]]; do # every parent must be a real dir (or someone else's link to one)
+      p="$p/${c%%/*}" c="${c#*/}"
+      if [[ -L "$p" ]] && ours "$p"; then rm "$p"
+      elif [[ (-e "$p" || -L "$p") && ! -d "$p" ]]; then aside "$p"
+      fi
+    done
+    mkdir -p "$(dirname "$t")"
+    if [[ -d "$t" && ! -L "$t" ]]; then # a real dir where a whole-dir link goes: drop our old links in it
+      find "$t" -type l | while IFS= read -r l; do if ours "$l"; then rm "$l"; fi; done
+      find "$t" -depth -type d -empty -delete
+    fi
+    if [[ -L "$t" ]] && ours "$t"; then :
+    elif [[ -e "$t" || -L "$t" ]]; then aside "$t"
+    fi
+    ln -sfn "$REPO/$f" "$t"
+    echo "link $t"
+  done <<<"$want"
+  echo "$want" >"$state"
 }
 
 cmd_add() {
@@ -51,7 +123,7 @@ cmd_add() {
   [[ -e "$target" ]] || { echo "obento: no such path: $target" >&2; exit 1; }
   [[ -L "$target" ]] && { echo "obento: already a symlink, skipping: $target"; exit 0; }
 
-  # Must live under $HOME so stow can symlink it back there.
+  # Must live under $HOME so it can be linked back there.
   case "$target" in
     "$HOME"/*) ;;
     *) echo "obento: path must be under \$HOME: $target" >&2; exit 1 ;;
@@ -65,24 +137,7 @@ cmd_add() {
   echo "Adding $rel -> $plat"
   mkdir -p "$(dirname "$dest")"
   mv "$target" "$dest"
-  stow --dir="$REPO" --target="$HOME" --restow --verbose "$plat"
-}
-
-# Repoint the links stow made from package dir $1 (and below) from $old to $new,
-# both relative to $HOME. Stops at each link, so folded dirs aren't walked.
-relink() {
-  local f link t up
-  for f in "$1"/.[!.]* "$1"/*; do
-    [[ -e "$f" ]] || continue
-    link="$HOME/${f#"$pkg"/}"
-    if [[ -L "$link" ]]; then
-      t="$(readlink "$link")"; up=""
-      while [[ "$t" == ../* ]]; do up+="../"; t="${t#../}"; done
-      if [[ "$t" == "$old/"* ]]; then ln -sfn "$up$new/${t#"$old/"}" "$link"; fi
-    elif [[ -d "$link" && -d "$f" ]]; then
-      relink "$f"
-    fi
-  done
+  cmd_link
 }
 
 cmd_move() {
@@ -91,9 +146,6 @@ cmd_move() {
   [[ "$dest" == "~/"* ]] && dest="$HOME/${dest#"~/"}"
   mkdir -p "$(dirname "$dest")"
   dest="$(cd "$(dirname "$dest")" && pwd)/$(basename "$dest")"
-  # Links are rewritten as paths relative to $HOME, so both ends must be under it.
-  [[ "$src" == "$HOME"/* && "$dest" == "$HOME"/* ]] ||
-    { echo "obento: both $src and $dest must be under \$HOME" >&2; exit 1; }
   [[ "$dest/" != "$src"/* ]] || { echo "obento: $dest is inside $src" >&2; exit 1; }
 
   if [[ -L "$src" && "$(readlink "$src")" == "$dest" ]]; then
@@ -107,10 +159,8 @@ cmd_move() {
   fi
   trap 'echo "obento: move did not finish; $src still points to $dest, so nothing is broken. Fix the error above and run \`obento move $dest\` again." >&2' EXIT
 
-  local old="${src#"$HOME"/}" new="${dest#"$HOME"/}" pkg pkgs=(shared)
-  [[ -d "$dest/$(platform)" ]] && pkgs+=("$(platform)")
-  for pkg in "${pkgs[@]}"; do pkg="$dest/$pkg"; relink "$pkg"; done
-  stow --dir="$dest" --target="$HOME" --restow "${pkgs[@]}"
+  REPO="$dest"
+  cmd_link
 
   # Linked worktrees still point at the old path; nested ones moved along.
   git -C "$dest" worktree list --porcelain | sed -n 's/^worktree //p' | while IFS= read -r w; do
@@ -131,7 +181,8 @@ cmd_move() {
 
 case "${1:-}" in
   update) shift; cmd_update "$@" ;;
+  link)   cmd_link ;;
   add)    shift; cmd_add "$@" ;;
   move)   shift; cmd_move "$@" ;;
-  *) echo "usage: obento {update|add <path>|move <dest>}" >&2; exit 1 ;;
+  *) echo "usage: obento {update|link|add <path>|move <dest>}" >&2; exit 1 ;;
 esac

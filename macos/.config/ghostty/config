@@ -1,4 +1,4 @@
-# Ghostty configuration (macOS). Symlinked to ~/.config/ghostty/config by stow.
+# Ghostty configuration (macOS). Symlinked to ~/.config/ghostty/config by obento.
 # Full reference: https://ghostty.org/docs/config
 
 # Prepare remote hosts for Ghostty over SSH. Fixes garbled input (one keypress

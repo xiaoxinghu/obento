@@ -1,5 +1,5 @@
 # Cross-platform CLI tools + runtimes, managed by mise.
-# Stowed to ~/.config/mise/config.toml and installed by setup.sh (`mise install`).
+# Linked to ~/.config/mise/config.toml and installed by setup.sh (`mise install`).
 # Platform-bound things (GUI apps, the shell + its plugins, system tools) live in
 # macos/Brewfile and linux/bootstrap.sh instead.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Set up this machine. Runs the platform bootstrap (native packages + mise),
-# symlinks dotfiles into $HOME with GNU stow (shared + the matching platform
+# links dotfiles into $HOME with `obento link` (shared + the matching platform
 # package), then installs the cross-platform CLI tools with mise. Idempotent.
 set -euo pipefail
 
@@ -18,26 +18,8 @@ if [[ -x "$REPO/$PLATFORM/setup.sh" ]]; then
 fi
 
 # ----- config -----
-pkgs=(shared)
-[[ -d "$REPO/$PLATFORM" ]] && pkgs+=("$PLATFORM")
-
-# Make ~/.local/bin a real dir before stow, so stow can't fold ~/.local into a
-# single symlink into the repo (that would swallow mise's ~/.local/{bin,share},
-# and the repo itself if it lives under ~/.local). The obento command lives in shared/.local/bin.
-install -d "$HOME/.local/bin"
-
-# Same guard for pi: keep ~/.pi/agent (and its extensions/skills dirs) as real
-# dirs so stow links individual entries instead of folding the whole tree into
-# the repo — that would swallow auth.json, sessions/, and herdr's extension, and
-# lets machine-local extensions/skills coexist with the stowed ones.
-install -d "$HOME/.pi/agent/extensions" "$HOME/.pi/agent/skills"
-
-# Same for herdr: only config.toml is tracked; sockets, sessions and logs live
-# beside it and must stay out of the repo.
-install -d "$HOME/.config/herdr"
-
-echo "Stowing: ${pkgs[*]} -> $HOME"
-stow --dir="$REPO" --target="$HOME" --restow --verbose "${pkgs[@]}"
+# One link per file, or one per dir for dirs with their own .gitignore.
+OBENTO_PATH="$REPO" "$REPO/shared/.local/bin/obento" link
 
 # ----- expose repo location -----
 # Persist $OBENTO_PATH so the `obento` command (and anything else) can find this
@@ -52,7 +34,7 @@ mv "$tmp" "$local_env"
 
 # ----- tools -----
 # Cross-platform CLI tools are declared in shared/.config/mise/config.toml,
-# which stow just linked to ~/.config/mise/config.toml. Install them.
+# which obento just linked to ~/.config/mise/config.toml. Install them.
 # Include the mise shims dir so mise-managed tools (gh, …) resolve below.
 export PATH="$HOME/.local/bin:${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims:/opt/homebrew/bin:/usr/local/bin:$PATH"
 if command -v mise >/dev/null 2>&1; then

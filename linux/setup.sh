@@ -22,11 +22,11 @@ detect_pm() {
 install_system() {
   case "$(detect_pm)" in
     apt-get) run apt-get update -y
-             run apt-get install -y zsh git tmux pass gnupg stow curl ca-certificates build-essential ;;
-    dnf)     run dnf install -y zsh git tmux pass gnupg2 stow curl ca-certificates gcc make ;;
-    pacman)  run pacman -Syu --needed --noconfirm zsh git tmux pass gnupg stow curl base-devel ;;
-    zypper)  run zypper install -y zsh git tmux pass gpg2 stow curl gcc make ;;
-    apk)     run apk add zsh git tmux pass gnupg stow curl ca-certificates build-base ;;
+             run apt-get install -y zsh git tmux pass gnupg curl ca-certificates build-essential ;;
+    dnf)     run dnf install -y zsh git tmux pass gnupg2 curl ca-certificates gcc make ;;
+    pacman)  run pacman -Syu --needed --noconfirm zsh git tmux pass gnupg curl base-devel ;;
+    zypper)  run zypper install -y zsh git tmux pass gpg2 curl gcc make ;;
+    apk)     run apk add zsh git tmux pass gnupg curl ca-certificates build-base ;;
   esac
 }
 

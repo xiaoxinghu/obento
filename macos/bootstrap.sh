@@ -49,7 +49,7 @@ else
 fi
 
 # ----- setup -----
-# setup.sh installs Homebrew + packages, stows dotfiles, and registers this
+# setup.sh installs Homebrew + packages, links dotfiles, and registers this
 # machine's SSH key on GitHub. It may prompt for your password (sudo) and for
 # GitHub auth; that's fine since you're running interactively.
 echo "Running setup.sh..."

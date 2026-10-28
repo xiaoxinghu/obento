@@ -29,8 +29,9 @@ at this repo):
 
 ```sh
 obento update            # git pull + re-run setup.sh (aborts on conflicts)
-obento add <path>        # move a config into the current platform and stow it
-obento move <dest>       # move this repo and repoint every link (under $HOME)
+obento link              # link shared + this platform's package into $HOME
+obento add <path>        # move a config into the current platform and link it
+obento move <dest>       # move this repo and repoint every link
 ```
 
 Example:
@@ -38,3 +39,9 @@ Example:
 ```sh
 obento add ~/.config/seth/seth.toml
 ```
+
+`obento link` links each file on its own, inside real dirs, so apps can keep
+runtime state next to their config without it landing in the repo. A dir with
+its own `.gitignore` (e.g. `macos/.config/emacs`) is linked whole instead, and
+that `.gitignore` keeps its runtime state out of git. Anything already in the
+way is moved aside to `<path>.obento-bak`, never deleted. Tests: `test/link.sh`.
