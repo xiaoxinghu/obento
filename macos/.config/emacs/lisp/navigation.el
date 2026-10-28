@@ -197,9 +197,11 @@
 
   )
 
-(with-eval-after-load 'dired
-	(evil-collection-define-key 'normal 'dired-mode-map
-		"a" '+macos-open-with))
+;; after evil-collection-init (keybindings.el), so this runs after its dired setup
+(with-eval-after-load 'evil-collection
+  (with-eval-after-load 'dired
+	  (evil-collection-define-key 'normal 'dired-mode-map
+		  "a" '+macos-open-with)))
 
 (use-package casual-dired
   :disabled t

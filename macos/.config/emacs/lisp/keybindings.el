@@ -26,8 +26,8 @@
 ;;   (define-key evil-motion-state-map (kbd "RET") nil))
 
 (use-package evil-collection
-  :demand t
-  :after evil
+  ;; once idle: it sets up every mode already loaded, so nothing is missed
+  :defer 1
   :init
   (setq forge-add-default-bindings nil)
   :config
