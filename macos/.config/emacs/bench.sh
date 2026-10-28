@@ -7,7 +7,8 @@
 #   idle      ... to the first idle moment (frame redisplayed; "usable")
 #   init-time Emacs's own `emacs-init-time`, for comparing with other configs
 # The copy is $TMPDIR/emacs-bench; run.out.features there lists what the last run
-# loaded.  Delete the copy after installing or removing packages.
+# loaded, run.out.messages its *Messages* (look there for startup errors).
+# Delete the copy after installing or removing packages.
 # usage: bench.sh [runs] [config-dir]   (3 runs, this script's directory)
 set -e
 runs=${1:-3}
@@ -37,6 +38,8 @@ rm -rf "$dir/lisp"; cp -R "$src/lisp" "$dir/lisp"
                  (insert (format "init-time=%s features=%d\n" (emacs-init-time "%.2f") (length features))))
                (with-temp-file (concat (getenv "BENCH_OUT") ".features")
                  (dolist (f (reverse features)) (insert (symbol-name f) "\n")))
+               (with-current-buffer "*Messages*"
+                 (write-region nil nil (concat (getenv "BENCH_OUT") ".messages")))
                (let ((kill-emacs-hook nil)) (kill-emacs)))))
           101)
 ;; the live Emacs owns the server socket and the global shortcut
