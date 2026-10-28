@@ -1,5 +1,12 @@
 hs.loadSpoon("SpoonInstall")
 
+-- The `hs` command line tool talks to Hammerspoon through this.
+require("hs.ipc")
+
+-- Dictation in any app, through the `dictate` CLI.
+local dictation = require("dictation")
+hs.hotkey.bind({ "alt" }, "space", dictation.toggle)
+
 -- Independent app shortcut: does not hide other applications.
 hs.hotkey.bind({ "alt" }, "e", function()
 	hs.application.launchOrFocus("Emacs")
