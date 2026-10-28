@@ -1,11 +1,7 @@
 ;;; -*- lexical-binding: t; -*-
 
-(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-(add-to-list 'default-frame-alist '(ns-appearance . dark))
-
-(scroll-bar-mode -1)
+;; frame parameters, tool and scroll bars, font: early-init.el
 ;; (menu-bar-mode -1)
-(tool-bar-mode -1)
 (blink-cursor-mode -1)
 (fset 'yes-or-no-p 'y-or-n-p)
 ;; (global-display-line-numbers-mode 1)
@@ -22,8 +18,6 @@
 ;; (set-frame-parameter nil 'alpha-background 85) ; Adjust 85 to your desired opacity (0-100)
 ;; (add-to-list 'default-frame-alist '(alpha-background . 85)) ; Adjust 85 to your desired opacity
 
-(set-frame-parameter (selected-frame) 'alpha-background 85)
-(add-to-list 'default-frame-alist '(alpha-background . 85))
 ;; (set-frame-parameter (selected-frame) 'alpha '(55 55))
 ;; (add-to-list 'default-frame-alist '(alpha 55 55))
 
@@ -45,13 +39,6 @@
 ;; (setq tab-bar-tab-name-function 'tab-bar-tab-name-truncated)
 ;; (global-tab-line-mode -1)
 ;; (tab-line-mode -1)
-
-(let* ((candidates '("JetBrainsMono Nerd Font-17" "Hack Nerd Font-17" "Fira Code-17"))
-       (chosen (seq-find (lambda (n) (member n (font-family-list))) candidates "JetBrainsMono Nerd Font-17")))
-  (cl-pushnew
-   (cons 'font chosen)
-   default-frame-alist
-   :key #'car :test #'eq))
 
 (use-package all-the-icons
   :if (display-graphic-p))

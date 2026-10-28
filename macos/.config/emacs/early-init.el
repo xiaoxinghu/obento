@@ -14,6 +14,29 @@
 (when (file-exists-p my/env-path)
   (load my/env-path))
 
+;; No file name handlers while init loads files; restored, with any added
+;; meanwhile, once init is done.
+(let ((handlers file-name-handler-alist))
+  (setq file-name-handler-alist nil)
+  (add-hook 'after-init-hook
+            (lambda ()
+              (setq file-name-handler-alist
+                    (delete-dups (append file-name-handler-alist handlers))))
+            -100))
+
+;; The first frame is made with these, rather than changed (and resized) by
+;; ui.el after it is drawn.  The font is from the Brewfile.
+(setq frame-inhibit-implied-resize t
+      tool-bar-mode nil
+      scroll-bar-mode nil)
+(dolist (param '((tool-bar-lines . 0)
+                 (vertical-scroll-bars)
+                 (ns-transparent-titlebar . t)
+                 (ns-appearance . dark)
+                 (alpha-background . 85)
+                 (font . "JetBrainsMono Nerd Font-17")))
+  (push param default-frame-alist))
+
 ;; one autoloads file instead of activating each package; where no-littering
 ;; puts it, which loads too late for this.  M-x package-quickstart-refresh
 ;; after changing packages by hand.
