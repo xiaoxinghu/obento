@@ -84,8 +84,6 @@
 
 (add-hook 'org-mode-hook #'my/prose-mode)
 (add-hook 'md-mode-hook #'my/prose-mode)
-(add-hook 'org-mode-hook #'my/prose-heading-faces)
-(add-hook 'md-mode-hook #'my/prose-heading-faces)
 
 ;; Keep prose readable while preserving alignment for code and tables.
 (set-face-attribute 'variable-pitch nil :family "SF Pro Text" :height 1.1)

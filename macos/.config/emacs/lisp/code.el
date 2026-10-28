@@ -69,7 +69,8 @@
 
 (use-package projectile
   :custom
-  (projectile-project-search-path '(("~/projects/" . 2)))
+  ;; depth 3 is <host>/<owner>/<repo>: every clone and its <repo>.<branch> worktrees
+  (projectile-project-search-path '(("~/code/" . 3)))
   :hook (after-init . projectile-mode)
   :config
   (setq projectile-completion-system 'default)
@@ -123,21 +124,18 @@
 
 (use-package magit
   :commands (magit-status magit-blame)
-  :init
-  ;; Have magit-status go full screen and quit to previous
-  ;; configuration.  Taken from
-  ;; http://whattheemacsd.com/setup-magit.el-01.html#comment-748135498
-  ;; and http://irreal.org/blog/?p=2253
-  (define-advice magit-status (:around (fn &rest args) fullscreen)
-    (window-configuration-to-register :magit-fullscreen)
-    (prog1 (apply fn args)
-      (delete-other-windows)))
-  (define-advice magit-quit-window (:after (&rest _) restore-screen)
-    (jump-to-register :magit-fullscreen))
   :custom
+  ;; Open magit in the current window; `q' restores the previous buffer there
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
   (magit-diff-refine-hunk 'all)
   (magit-git-executable "/opt/homebrew/bin/git")
 	(magit-diff-arguments '("--ignore-all-space"))
+  ;; Syntax-highlight hunks with the file's major mode (Magit 4.6, experimental:
+  ;; synchronous, so large diffs may pause).  The foreground option must be nil
+  ;; before Magit loads, or the hunk faces override the syntax colours.
+  (magit-diff-fontify-hunk 'all)
+  (magit-diff-specify-hunk-foreground nil)
+  (magit-diff-use-indicator-faces t)
   :config
   ;; (remove-hook 'magit-status-sections-hook 'magit-insert-tags-header)
   ;; (remove-hook 'magit-status-sections-hook 'magit-insert-status-headers)
@@ -145,7 +143,22 @@
   (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-pushremote)
   (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-upstream)
   (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-upstream-or-recent)
+  (evil-define-key '(normal visual) magit-log-mode-map (kbd "gd") #'my/magit-review-region)
   )
+
+(defun my/magit-review-region ()
+  "Review the commits selected in a magit log, the oldest included, with diff-review.
+Without a selection, review the commit at point.  The review file lives in
+the repository's git directory, so the same range reopens with its marks."
+  (interactive)
+  (let* ((revs (or (magit-region-values '(commit branch) t)
+                   (list (or (magit-commit-at-point) (user-error "No commit here")))))
+         (new (magit-rev-abbrev (car revs)))
+         (old (magit-rev-abbrev (car (last revs)))))
+    (deactivate-mark)
+    (when (bound-and-true-p evil-local-mode) (evil-normal-state))
+    (diff-review-find-file (magit-git-dir (format "review/%s..%s.json" old new))
+                           (magit-toplevel) (concat old "^") new)))
 
 (defhydra hydra-merge (:color blue :hint nil)
   "
@@ -456,6 +469,11 @@ _c_: continue     _L_: log message     _D_: disconnect
 	:after magit
 	:config
 	(setq magit-difftastic-display "inline")
+	;; Keep difftastic for staging in the status buffer; diff and revision
+	;; buffers (branch review: `magit-diff-range' main...tsk-x) use stock Magit
+	;; with `magit-diff-fontify-hunk'.  `C-c C-d' still toggles a file.
+	(setq magit-difftastic-diff-buffers nil
+				magit-difftastic-revision-buffers nil)
 	(magit-difftastic-mode +1))
 
 (provide 'code)

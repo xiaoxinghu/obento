@@ -9,17 +9,6 @@
 (use-package eat
 	:disabled t)
 
-(use-package ghostel
-  :bind (("s-t" . ghostel))
-	:config
-	(add-to-list 'project-switch-commands '(ghostel-project "Ghostel") t)
-	(add-to-list 'project-switch-commands '(ghostel-project-list-buffers "Ghostel buffers") t)
-  (add-to-list 'ghostel-eval-cmds '("magit-status-setup-buffer" magit-status-setup-buffer)))
-
-(use-package evil-ghostel
-  :after (ghostel evil)
-  :hook (ghostel-mode . evil-ghostel-mode))
-
 (use-package pdf-tools
 	:disabled t
   :mode ("\\.pdf\\'" . pdf-view-mode)
@@ -205,17 +194,98 @@
 (use-package links
   :local "~/workspace/links.el")
 
-(use-package task
-	:ensure nil
-	:commands (task-list task-add task-claim task-done task-visit task-visit-worktree
-							task-finish task-finish-all)
+(use-package ws
+  :local "~/code/github.com/xiaoxinghu/ws/emacs"
+	:commands (ws-tasks ws-task-list ws-add ws-claim ws-done ws-visit ws-visit-worktree ws-finish)
 	:config
-	(evil-define-key 'normal task-list-mode-map
-		(kbd "RET") #'task-visit
-		"a" #'task-add
-		"c" #'task-claim
-		"d" #'task-done
-		"w" #'task-visit-worktree
-		"x" #'task-finish
-		"X" #'task-finish-all))
+	(evil-define-key 'normal ws-tasks-mode-map
+		(kbd "RET") #'ws-visit
+		(kbd "TAB") #'ws-tasks-toggle-folder
+		(kbd "<tab>") #'ws-tasks-toggle-folder
+		"D" #'ws-tasks-toggle-done
+		"a" #'ws-add
+		"c" #'ws-claim
+		"d" #'ws-done
+		"i" #'flow-implement
+		"r" #'flow-diff
+		"w" #'ws-visit-worktree
+		"x" #'ws-finish))
+
+(use-package portal
+  :local "~/code/github.com/xiaoxinghu/portal"
+  :vc (:url "https://github.com/xiaoxinghu/portal" :rev :newest)
+	:demand t
+  :bind (("s-p" . hydra-portal/body))
+	:custom
+	(portal-terminal-theme "Catppuccin Mocha")
+	;; Escape twice returns from a view's app to Emacs, as Escape leaves insert state.
+	(portal-input-double-escape 0.3)
+	:config
+	;; A view's buffer is in normal state while Emacs has the keyboard, so SPC
+	;; leads there; i enters the app, as insert state.
+	(with-eval-after-load 'portal-input
+	  (evil-define-key 'normal portal-input-mode-map "i" #'portal-input-focus))
+	;; Each kind of view gets its own icon, lit while the view has the keyboard.
+	(with-eval-after-load 'nerd-icons
+	  (dolist (icon '((portal-terminal-mode nerd-icons-devicon "nf-dev-terminal")
+	                  (portal-web-mode nerd-icons-mdicon "nf-md-web")
+	                  (portal-excalidraw-mode nerd-icons-mdicon "nf-md-draw")))
+	    (add-to-list 'nerd-icons-mode-icon-alist
+	                 (append icon '(:face portal-mode-line-focus)))))
+  (with-eval-after-load 'portal-terminal-consult
+    (consult-customize
+     portal-terminal-consult-source
+     portal-terminal-consult-project-source
+     :preview-key 'any))
+  (defhydra hydra-portal (:color blue :hint nil)
+    "Portal"
+    ("p" portal-terminal-choose-project "project terminal")
+    ("t" portal-terminal-choose "all terminals")
+    ("n" portal-terminal-new "new terminal")
+    ("r" portal-terminal-rename "rename terminal")
+    ("z" portal-terminal-zoom "zoom terminal")
+    ("i" flow-implement "implement task in herdr")
+    ("m" portal-render-markdown "markdown preview")
+    ("h" portal-render-html "html preview")
+    ("e" portal-excalidraw "excalidraw")
+    ("u" portal-open-url "open URL")
+    ("q" nil "quit"))
+
+  (defun my/terminal ()
+    "Start the first terminal, jump to the only one, or choose among several.
+From inside the only terminal, choose too, so a new one is a key away."
+    (interactive)
+    (let ((buffers (portal-terminal-buffers)))
+      (cond ((null buffers) (portal-terminal-new))
+            ((and (null (cdr buffers)) (not (eq (car buffers) (current-buffer))))
+             (portal-terminal-select (car buffers)))
+            (t (portal-terminal-choose)))))
+
+	(keymap-global-set "s-t" #'my/terminal)
+	(keymap-global-set "s-T" #'portal-terminal-toggle)
+	(portal-terminal-bind-key portal-terminal-quick-native-map
+														"s-T" #'portal-terminal-toggle)
+
+  (require 'portal-launcher)
+  (require 'portal-global-shortcut)
+
+  (defun my/app-launcher ()
+    "Launch apps, search the web, or query tools in Portal's panel.
+With a prefix argument, rebuild the application index first."
+    (interactive)
+    (let ((vertico-count 6)
+          (portal-launcher-size '(720 auto))
+          (portal-launcher-height-limits '(content 480)))
+      (portal-launcher-present #'launcher-buffer
+                               :kind 'buffer
+                               :mode-line nil)))
+
+  (portal-global-shortcut-set 'app-launcher "Command-Space"
+                              #'my/app-launcher))
+
+;; Working a task: ws, herdr, Claude and the review loop.  See ~/code/github.com/xiaoxinghu/flow.
+(use-package flow
+  :local "~/code/github.com/xiaoxinghu/flow/emacs"
+	:commands (flow-implement flow-diff))
+
 (provide 'tools)

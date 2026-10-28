@@ -32,7 +32,16 @@
 
 ;; `:local DIR' loads a package from my checkout when DIR exists, in place
 ;; of `:vc' or `:ensure'.  Without DIR and without `:vc', the package is skipped.
+;; Its `;;;###autoload' cookies are honoured, as for an installed package.
 (add-to-list 'use-package-keywords :local)
+
+(defun +use-package--local-autoloads (name dir)
+  "Load the autoloads of package NAME from DIR, regenerated when stale."
+  (let ((file (expand-file-name (format "var/autoloads/%s-autoloads.el" name)
+                                user-emacs-directory)))
+    (make-directory (file-name-directory file) t)
+    (loaddefs-generate dir file)
+    (load file nil t)))
 
 (defun use-package-normalize/:local (_name keyword args)
   (use-package-only-one (symbol-name keyword) args
@@ -45,7 +54,8 @@
     (dolist (kw '(:pin :ensure :vc))
       (setq rest (use-package-plist-delete rest kw)))
     (use-package-concat
-     `((add-to-list 'load-path ,(expand-file-name dir)))
+     `((add-to-list 'load-path ,(expand-file-name dir))
+       (+use-package--local-autoloads ',name ,(expand-file-name dir)))
      (use-package-process-keywords name rest state)))
    ((plist-member rest :vc)
     (use-package-process-keywords name rest state))))

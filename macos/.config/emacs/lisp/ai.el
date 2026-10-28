@@ -123,6 +123,28 @@
         (agent-shell-make-environment-variables
          "ANTHROPIC_API_KEY" (auth-source-pick-first-password :host "api.anthropic.com"))))
 
+;;; ghost - the durable agent over ~/files, through its CLI
+;; Loaded from the justfiles clone, so it follows main like the `ghost' CLI does.
+(use-package ghost
+  :local "~/code/github.com/justfiles/justfiles/packages/shell/emacs"
+  :commands (ghost-ask ghost-ask-insert ghost-steer ghost-abort ghost-new ghost-transcript
+             ghost-explain)
+	:bind
+  (("s-/" . ghost-ask)
+   ("s-j" . ghost-transcript))
+  :config
+  (ghost-define-command ghost-explain
+    "Explain the word, then use it in 3 sentences, then translate it into Chinese."
+    :effort "low")
+  (evil-define-key '(normal motion) ghost-transcript-mode-map
+    "q" #'quit-window
+    "n" #'ghost-next-turn
+    "p" #'ghost-previous-turn
+    "y" #'ghost-copy-answer
+    (kbd "RET") #'ghost-ask
+    (kbd "TAB") #'ghost-toggle-call
+    (kbd "<tab>") #'ghost-toggle-call))
+
 ;;; UI Configuration
 (set-face-foreground 'vertical-border "gold")
 

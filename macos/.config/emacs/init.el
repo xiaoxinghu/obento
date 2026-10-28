@@ -28,6 +28,7 @@
 (require 'notes)
 (require 'checker)
 (require 'code)
+(require 'diff-review)
 (require 'use-eglot)
 ;; (require 'use-lsp)
 ;; (require 'use-lsp-bridge)
