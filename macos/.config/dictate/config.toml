@@ -1,0 +1,9 @@
+mic = "Yeti Stereo Microphone"
+# Names and words the transcriber should favour. A hint also pulls words
+# that start like it toward it, so leave out any that begin like common
+# words: workmux turned "works" and "workspace" into "workmux".
+hints = [
+  "obento", "Ghostty", "tmux", "zsh", "mise", "Homebrew", "Brewfile",
+  "lazygit", "Neovim", "whisper.cpp", "Claude", "AeroSpace", "Eglot", "gptel",
+  "Elisp", "Emacs", "Org", "Hydra", "Evil", "Magit",
+]
