@@ -32,6 +32,10 @@ install -d "$HOME/.local/bin"
 # lets machine-local extensions/skills coexist with the stowed ones.
 install -d "$HOME/.pi/agent/extensions" "$HOME/.pi/agent/skills"
 
+# Same for herdr: only config.toml is tracked; sockets, sessions and logs live
+# beside it and must stay out of the repo.
+install -d "$HOME/.config/herdr"
+
 echo "Stowing: ${pkgs[*]} -> $HOME"
 stow --dir="$REPO" --target="$HOME" --restow --verbose "${pkgs[@]}"
 

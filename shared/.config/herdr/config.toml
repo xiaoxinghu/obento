@@ -1,0 +1,7 @@
+onboarding = false
+[theme]
+  name = "catppuccin"
+
+[theme.custom]
+  surface_dim = "#585b70"
+  accent = "#89b4fa"
