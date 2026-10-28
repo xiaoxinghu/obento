@@ -50,8 +50,13 @@
   "Load the autoloads of package NAME from DIR, regenerated when stale."
   (let ((file (expand-file-name (format "var/autoloads/%s-autoloads.el" name)
                                 user-emacs-directory)))
-    (make-directory (file-name-directory file) t)
-    (loaddefs-generate dir file)
+    ;; loaddefs-generate leaves an unchanged file alone, so its time is
+    ;; stale and it would rescan every start; touch it after a scan
+    (when (seq-some (lambda (el) (file-newer-than-file-p el file))
+                    (directory-files dir t "\\.el\\'"))
+      (make-directory (file-name-directory file) t)
+      (loaddefs-generate dir file)
+      (set-file-times file))
     (load file nil t)))
 
 (defun use-package-normalize/:local (_name keyword args)
