@@ -19,6 +19,7 @@ brew "ffmpeg"   # whisper.el converts files for whisper-file with it
 # GUI apps + fonts
 cask "ghostty"
 cask "aerospace"
+cask "hammerspoon"
 cask "emacs-plus-app"
 cask "resilio-sync"
 cask "font-jetbrains-mono-nerd-font"
