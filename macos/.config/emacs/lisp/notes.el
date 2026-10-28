@@ -6,6 +6,8 @@
 	(org-directory my/files-location)
 	;; no ol-* modules: ol-gnus alone drags in gnus, url, shr, smime
 	(org-modules nil)
+	;; no citations in my notes; spares oc-basic and bibtex
+	(org-cite-activate-processor nil)
 	(org-src-preserve-indentation t)
 	(org-pretty-entities-include-sub-superscripts nil)
 	(org-goto-interface 'outline-path-completion)
@@ -80,8 +82,9 @@
 	(setq org-link-frame-setup
 				'((file . find-file)))
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
-  (require 'org-protocol)
-  (require 'org-archive)
+  ;; org-protocol only has to be there before a capture link arrives;
+  ;; org-archive's commands are autoloaded
+  (run-with-idle-timer 1 nil #'require 'org-protocol)
 
   ;; templates
 
