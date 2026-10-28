@@ -353,16 +353,7 @@ the repository's git directory, so the same range reopens with its marks."
   ;; If you do not want to use any prefix, set it to nil.
   ;; (setq dape-key-prefix "\C-x\C-a")
 
-  :hook
-  ;; Save breakpoints on quit
-  (kill-emacs . dape-breakpoint-save)
-  ;; Load breakpoints on startup
-  (after-init . dape-breakpoint-load)
-
   :custom
-  ;; Turn on global bindings for setting breakpoints with mouse
-  (dape-breakpoint-global-mode +1)
-
   ;; Info buffers to the right
   ;; (dape-buffer-window-arrangement 'right)
   ;; Info buffers like gud (gdb-mi)
@@ -373,6 +364,11 @@ the repository's git directory, so the same range reopens with its marks."
   (dape-cwd-function #'projectile-project-root)
 
   :config
+  ;; on first use, not at startup: `:custom' on the autoloaded mode loaded dape,
+  ;; and saving on quit is only safe once the saved breakpoints were loaded
+  (dape-breakpoint-global-mode +1)
+  (dape-breakpoint-load)
+  (add-hook 'kill-emacs-hook #'dape-breakpoint-save)
 
 	(defhydra hydra-debug (:color pink :hint nil)
 		"
