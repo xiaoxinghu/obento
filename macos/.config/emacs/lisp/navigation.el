@@ -232,7 +232,9 @@
 (setq initial-buffer-choice 'remember-notes
       remember-data-file my/now-file
       remember-notes-initial-major-mode 'org-mode
-      remember-notes-auto-save-visited-file t)
+      remember-notes-auto-save-visited-file t
+      ;; *scratch* is never what shows at startup; spare it the prog-mode hooks
+      initial-major-mode 'fundamental-mode)
 
 ;; find file TODO: assign keys
 (use-package affe
