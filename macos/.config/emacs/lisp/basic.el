@@ -23,12 +23,23 @@
   (unless (server-running-p)
     (server-start)))
 
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+;; not required: package.el loads url and browse-url, and startup needs only
+;; package-activate; it loads when a package has to be installed
+(with-eval-after-load 'package
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t))
 
 (require 'use-package)
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
+;; `use-package-ensure-elpa' loads package.el only to ask what package-activate
+;; already knows from the quickstart; ask first, install what is missing.
+(setq use-package-ensure-function
+      (lambda (name args state &optional no-refresh)
+        (unless (seq-every-p (lambda (e)
+                               (package-installed-p
+                                (if (eq e t) (use-package-as-symbol name) (or (car-safe e) e))))
+                             (remq nil args))
+          (use-package-ensure-elpa name args state no-refresh))))
 
 ;; `:local DIR' loads a package from my checkout when DIR exists, in place
 ;; of `:vc' or `:ensure'.  Without DIR and without `:vc', the package is skipped.
