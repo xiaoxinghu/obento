@@ -220,11 +220,13 @@
 
 ;; search
 (use-package anzu
-  :hook (after-init . global-anzu-mode))
+  :defer 1
+  :config
+  (global-anzu-mode 1))
 
 (use-package evil-anzu
   :demand t
-  :after evil
+  :after (evil anzu)
   :config
   (require 'evil-anzu))
 

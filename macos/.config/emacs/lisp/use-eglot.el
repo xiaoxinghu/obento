@@ -250,6 +250,7 @@ https://github.com/joaotavora/eglot/issues/1258"
 (setq eldoc-echo-area-use-multiline-p nil)
 
 (use-package eldoc-box
+  :after eglot
   :demand t
   :config
   (defun my/eldoc-box-help-at-point ()

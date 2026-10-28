@@ -114,7 +114,9 @@
 (use-package direnv
   :custom
   (direnv-always-show-summary nil)
-  :hook (after-init . direnv-mode))
+  :defer 1
+  :config
+  (direnv-mode 1))
 
 (use-package auth-source
 	:ensure nil

@@ -97,7 +97,7 @@
 
 (use-package nyan-mode
   :vc (:url "https://github.com/TeMPOraL/nyan-mode" :rev :newest)
-  :demand t
+  :defer 1
   :config
   (nyan-mode 1))
 

@@ -28,17 +28,21 @@
   )
 
 (use-package evil-textobj-tree-sitter
-  :demand t
-  :after evil
+  :defer 1
   :config
-  ;; bind `function.outer`(entire function block) to `f` for use in things like `vaf`, `yaf`
-  (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
-  (define-key evil-outer-text-objects-map "v" (evil-textobj-tree-sitter-get-textobj "parameter.outer"))
-  ;; bind `function.inner`(function block without name and args) to `f` for use in things like `vif`, `yif`
-  (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
+  ;; quoted: the macro is autoloaded, and eager expansion of this :config
+  ;; would load the package at startup (see ghost in ai.el)
+  (eval
+   '(progn
+      ;; bind `function.outer`(entire function block) to `f` for use in things like `vaf`, `yaf`
+      (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
+      (define-key evil-outer-text-objects-map "v" (evil-textobj-tree-sitter-get-textobj "parameter.outer"))
+      ;; bind `function.inner`(function block without name and args) to `f` for use in things like `vif`, `yif`
+      (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
 
-  ;; You can also bind multiple items and we will match the first one we can find
-  (define-key evil-outer-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj ("conditional.outer" "loop.outer")))
+      ;; You can also bind multiple items and we will match the first one we can find
+      (define-key evil-outer-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj ("conditional.outer" "loop.outer"))))
+   t)
   ;; Goto start of next function
   (define-key evil-normal-state-map
               (kbd "]f")
@@ -72,8 +76,9 @@
   :custom
   ;; depth 3 is <host>/<owner>/<repo>: every clone and its <repo>.<branch> worktrees
   (projectile-project-search-path '(("~/code/" . 3)))
-  :hook (after-init . projectile-mode)
+  :defer 1
   :config
+  (projectile-mode 1)
   (setq projectile-completion-system 'default)
 
   (defhydra hydra-project (:hint nil)
@@ -277,7 +282,9 @@ the repository's git directory, so the same range reopens with its marks."
   :ensure nil
   :custom
   (editorconfig-exclude-modes '(org-mode))
-  :hook (after-init . editorconfig-mode))
+  :defer 1
+  :config
+  (editorconfig-mode 1))
 
 (with-eval-after-load 'editorconfig
   (add-to-list 'editorconfig-indentation-alist

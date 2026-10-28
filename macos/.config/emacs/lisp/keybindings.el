@@ -58,7 +58,9 @@
 
 (use-package which-key
   :ensure nil
-  :hook (after-init . which-key-mode))
+  :defer 1
+  :config
+  (which-key-mode 1))
 
 (use-package hydra
   :demand t)
