@@ -88,10 +88,13 @@
   ;; insert mode when capture
   (add-hook 'org-capture-mode-hook 'evil-insert-state)
 
-  ;; babel
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((python . t) (shell . t) (C . t) (ditaa . t)))
+  ;; babel: load the languages on the first block run, not with org
+  (defun my/org-babel-load-languages (&rest _)
+    (advice-remove 'org-babel-execute-src-block #'my/org-babel-load-languages)
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((python . t) (shell . t) (C . t) (ditaa . t))))
+  (advice-add 'org-babel-execute-src-block :before #'my/org-babel-load-languages)
   (setq org-babel-python-command "python3"
 				org-confirm-babel-evaluate nil)
 
