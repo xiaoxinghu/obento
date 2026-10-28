@@ -13,6 +13,8 @@ brew "git"
 brew "tmux"
 brew "stow"
 brew "pass"
+brew "sox"      # audio recording for whisper.el
+brew "ffmpeg"   # whisper.el converts files for whisper-file with it
 
 # GUI apps + fonts
 cask "ghostty"

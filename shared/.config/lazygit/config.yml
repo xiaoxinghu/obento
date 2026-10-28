@@ -1,21 +1,18 @@
 git:
-  pagers:
+  diffRenderers:
     - colorArg: never
-      pager: hunk pager --line-numbers
-
+      command: hunk pager --line-numbers
 customCommands:
   - key: '<c-o>'
     context: global
     description: 'Open Hunk for working tree'
     command: 'hunk diff'
     output: terminal
-
   - key: '<c-s>'
     context: global
     description: 'Open Hunk for staged changes'
     command: 'hunk diff --staged'
     output: terminal
-
   - key: '<c-g>'
     context: 'commits, subCommits'
     description: 'Open Hunk for selected commit'
