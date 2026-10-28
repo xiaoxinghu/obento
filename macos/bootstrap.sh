@@ -10,15 +10,13 @@
 # you're already your own user, and Homebrew (invoked by setup.sh) refuses to
 # run as root. So this just:
 #   1. ensures git exists (via the Xcode Command Line Tools),
-#   2. clones this obento repo into ~/.local/share/obento (or updates it),
+#   2. clones this obento repo into $OBENTO_PATH (or updates it),
 #   3. runs setup.sh.
 # Idempotent: re-run any time to converge the machine to the desired state.
 set -euo pipefail
 
 # Overridable via environment.
 REPO_URL="${REPO_URL:-https://github.com/xiaoxinghu/obento.git}"
-# XDG data home convention (matches the Linux bootstrap and the `obento` cmd).
-CONFIG_SUBPATH="${CONFIG_SUBPATH:-.local/share/obento}"
 
 if [[ $EUID -eq 0 ]]; then
   echo "Don't run as root on macOS; run as your normal user." >&2
@@ -37,7 +35,10 @@ if ! xcode-select -p >/dev/null 2>&1; then
 fi
 
 # ----- clone -----
-DEST="$HOME/$CONFIG_SUBPATH"
+# Where the repo lives: $OBENTO_PATH if set, else where setup.sh recorded it on
+# an earlier run, else the ws code layout. Move it later with `obento move`.
+[[ -n "${OBENTO_PATH:-}" ]] || OBENTO_PATH="$(sed -n 's/^export OBENTO_PATH=//p' "$HOME/.config/zsh/local.zshenv" 2>/dev/null || true)"
+DEST="${OBENTO_PATH:-$HOME/code/github.com/xiaoxinghu/obento}"
 if [[ -d "$DEST/.git" ]]; then
   echo "Repo already at $DEST, updating..."
   git -C "$DEST" pull --ff-only

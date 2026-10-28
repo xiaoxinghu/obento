@@ -3,6 +3,7 @@
 #
 #   obento update        git pull + re-run setup.sh (aborts on conflicts)
 #   obento add <path>    move a config into the current platform and stow it
+#   obento move <dest>   move this repo to <dest> and repoint every stow link
 #
 # Finds the repo via $OBENTO_PATH (set by setup.sh); falls back to resolving
 # this script's own location, since it's stowed from <repo>/shared/.local/bin.
@@ -67,8 +68,70 @@ cmd_add() {
   stow --dir="$REPO" --target="$HOME" --restow --verbose "$plat"
 }
 
+# Repoint the links stow made from package dir $1 (and below) from $old to $new,
+# both relative to $HOME. Stops at each link, so folded dirs aren't walked.
+relink() {
+  local f link t up
+  for f in "$1"/.[!.]* "$1"/*; do
+    [[ -e "$f" ]] || continue
+    link="$HOME/${f#"$pkg"/}"
+    if [[ -L "$link" ]]; then
+      t="$(readlink "$link")"; up=""
+      while [[ "$t" == ../* ]]; do up+="../"; t="${t#../}"; done
+      if [[ "$t" == "$old/"* ]]; then ln -sfn "$up$new/${t#"$old/"}" "$link"; fi
+    elif [[ -d "$link" && -d "$f" ]]; then
+      relink "$f"
+    fi
+  done
+}
+
+cmd_move() {
+  local dest="${1:-}" src="$REPO" w
+  [[ -n "$dest" ]] || { echo "usage: obento move <dest>" >&2; exit 1; }
+  [[ "$dest" == "~/"* ]] && dest="$HOME/${dest#"~/"}"
+  mkdir -p "$(dirname "$dest")"
+  dest="$(cd "$(dirname "$dest")" && pwd)/$(basename "$dest")"
+  # Links are rewritten as paths relative to $HOME, so both ends must be under it.
+  [[ "$src" == "$HOME"/* && "$dest" == "$HOME"/* ]] ||
+    { echo "obento: both $src and $dest must be under \$HOME" >&2; exit 1; }
+  [[ "$dest/" != "$src"/* ]] || { echo "obento: $dest is inside $src" >&2; exit 1; }
+
+  if [[ -L "$src" && "$(readlink "$src")" == "$dest" ]]; then
+    echo "Resuming the move to $dest"
+  else
+    [[ ! -e "$dest" ]] || { echo "obento: $dest already exists" >&2; exit 1; }
+    echo "Moving $src -> $dest"
+    mv "$src" "$dest"
+    # Keep the old path working until every link points at the new one.
+    ln -s "$dest" "$src"
+  fi
+  trap 'echo "obento: move did not finish; $src still points to $dest, so nothing is broken. Fix the error above and run \`obento move $dest\` again." >&2' EXIT
+
+  local old="${src#"$HOME"/}" new="${dest#"$HOME"/}" pkg pkgs=(shared)
+  [[ -d "$dest/$(platform)" ]] && pkgs+=("$(platform)")
+  for pkg in "${pkgs[@]}"; do pkg="$dest/$pkg"; relink "$pkg"; done
+  stow --dir="$dest" --target="$HOME" --restow "${pkgs[@]}"
+
+  # Linked worktrees still point at the old path; nested ones moved along.
+  git -C "$dest" worktree list --porcelain | sed -n 's/^worktree //p' | while IFS= read -r w; do
+    [[ "$w" == "$src"/* ]] && w="$dest/${w#"$src"/}"
+    [[ "$w" == "$dest" ]] || git -C "$dest" worktree repair "$w" ||
+      echo "obento: could not repair worktree $w" >&2
+  done
+
+  # Same OBENTO_PATH line setup.sh writes.
+  local env="$HOME/.config/zsh/local.zshenv"
+  { grep -v '^export OBENTO_PATH=' "$env" 2>/dev/null || true; printf 'export OBENTO_PATH=%q\n' "$dest"; } >"$env.tmp"
+  mv "$env.tmp" "$env"
+
+  rm "$src"
+  trap - EXIT
+  echo "Moved to $dest. Restart your shell (exec zsh) to pick up the new \$OBENTO_PATH."
+}
+
 case "${1:-}" in
   update) shift; cmd_update "$@" ;;
   add)    shift; cmd_add "$@" ;;
-  *) echo "usage: obento {update|add <path>}" >&2; exit 1 ;;
+  move)   shift; cmd_move "$@" ;;
+  *) echo "usage: obento {update|add <path>|move <dest>}" >&2; exit 1 ;;
 esac

@@ -22,8 +22,8 @@ pkgs=(shared)
 [[ -d "$REPO/$PLATFORM" ]] && pkgs+=("$PLATFORM")
 
 # Make ~/.local/bin a real dir before stow, so stow can't fold ~/.local into a
-# single symlink into the repo (that would swallow ~/.local/share/obento and
-# mise's ~/.local/{bin,share}). The obento command lives in shared/.local/bin.
+# single symlink into the repo (that would swallow mise's ~/.local/{bin,share},
+# and the repo itself if it lives under ~/.local). The obento command lives in shared/.local/bin.
 install -d "$HOME/.local/bin"
 
 # Same guard for pi: keep ~/.pi/agent (and its extensions/skills dirs) as real

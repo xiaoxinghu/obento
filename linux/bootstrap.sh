@@ -15,7 +15,7 @@
 #   1. installs the bare minimum to proceed (git + sudo),
 #   2. creates the requested user (in the sudo/wheel group) if missing,
 #      copying root's authorized_keys and setting a password,
-#   3. clones this obento repo into the user's home (or updates it),
+#   3. clones this obento repo into $OBENTO_PATH (or updates it),
 #   4. runs setup.sh as that user,
 #   5. sets zsh as that user's login shell.
 # Idempotent: re-run any time to converge the machine to the desired state.
@@ -23,8 +23,6 @@ set -euo pipefail
 
 # Overridable via environment.
 REPO_URL="${REPO_URL:-https://github.com/xiaoxinghu/obento.git}"
-# XDG data home convention (chezmoi uses ~/.local/share/chezmoi, yadm ~/.local/share/yadm).
-CONFIG_SUBPATH="${CONFIG_SUBPATH:-.local/share/obento}"
 USERNAME="${USERNAME:-}"
 export DEBIAN_FRONTEND=noninteractive
 
@@ -103,7 +101,10 @@ fi
 
 # ----- clone -----
 USER_HOME="$(getent passwd "$USERNAME" | cut -d: -f6)"
-DEST="$USER_HOME/$CONFIG_SUBPATH"
+# Where the repo lives: $OBENTO_PATH if set, else where setup.sh recorded it on
+# an earlier run, else the ws code layout. Move it later with `obento move`.
+[[ -n "${OBENTO_PATH:-}" ]] || OBENTO_PATH="$(sed -n 's/^export OBENTO_PATH=//p' "$USER_HOME/.config/zsh/local.zshenv" 2>/dev/null || true)"
+DEST="${OBENTO_PATH:-$USER_HOME/code/github.com/xiaoxinghu/obento}"
 
 if [[ -d "$DEST/.git" ]]; then
   echo "Repo already at $DEST, updating..."
