@@ -4,6 +4,8 @@
 	:ensure nil
 	:custom
 	(org-directory my/files-location)
+	;; no ol-* modules: ol-gnus alone drags in gnus, url, shr, smime
+	(org-modules nil)
 	(org-src-preserve-indentation t)
 	(org-pretty-entities-include-sub-superscripts nil)
 	(org-goto-interface 'outline-path-completion)
