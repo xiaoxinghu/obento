@@ -12,21 +12,6 @@
 						;; (setq tab-width 4)
 						(setq py-indent-tabs-mode nil)))
 
-(use-package combobulate
-  :disabled t
-  :vc (:url "https://github.com/mickeynp/combobulate" :rev :newest)
-  :custom
-  ;; You can customize Combobulate's key prefix here.
-  ;; Note that you may have to restart Emacs for this to take effect!
-  (combobulate-key-prefix "C-c o")
-  :hook (
-         (prog-mode . combobulate-mode)
-         (typescript-ts-mode . combobulate-mode)
-         (html-ts-mode . combobulate-mode)
-         )
-  ;; :load-path ("~/.config/emacs/packages/combobulate")
-  )
-
 (use-package evil-textobj-tree-sitter
   :defer 1
   :config

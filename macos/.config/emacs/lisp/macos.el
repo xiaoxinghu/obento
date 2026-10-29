@@ -59,15 +59,4 @@
 	:commands (launcher)
   :local "~/workspace/launcher.el")
 
-;; Reached from outside through the server, which starts once idle too.
-(use-package present
-	:defer 1
-  :local "~/workspace/present.el")
-
-(use-package commander
-	:defer 1
-  ;; it uses transient's macro without requiring transient
-  :init (autoload 'transient-define-prefix "transient" nil nil 'macro)
-  :local "~/workspace/commander.el")
-
 (provide 'macos)
