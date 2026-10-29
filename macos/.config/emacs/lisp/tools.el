@@ -1,11 +1,5 @@
 ;;; -*- lexical-binding: t; -*-
 
-(use-package vterm
-	:disabled t
-  :custom
-  (vterm-module-cmake-args "-DCMAKE_PREFIX_PATH=/opt/homebrew")
-  )
-
 (use-package eat
 	:disabled t)
 
