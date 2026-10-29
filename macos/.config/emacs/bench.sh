@@ -17,7 +17,13 @@ live=$(cd ~/.config/emacs && pwd -P)
 dir=${TMPDIR:-/tmp}/emacs-bench
 mkdir -p "$dir"
 # packages, caches and state come from the live config, copied once
-[ -d "$dir/elpa" ] || rsync -a --exclude /lisp "$live/" "$dir/"
+# ...except the quickstart file, which names the live package directories
+[ -d "$dir/elpa" ] || {
+  rsync -a --exclude /lisp --exclude '/var/package-quickstart.*' "$live/" "$dir/"
+  emacs -Q --batch --init-directory "$dir" --eval '(progn (package-initialize t)
+    (setq package-quickstart-file (expand-file-name "var/package-quickstart.el" user-emacs-directory))
+    (package-quickstart-refresh))' >"$dir/run.log" 2>&1
+}
 rm -rf "$dir/lisp"; cp -R "$src/lisp" "$dir/lisp"
 # early-init.el: the clock, started before anything else, after the cookie line
 { head -1 "$src/early-init.el"; cat <<'EL'

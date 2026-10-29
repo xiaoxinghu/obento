@@ -50,11 +50,13 @@
   (let ((file (expand-file-name (format "var/autoloads/%s-autoloads.el" name)
                                 user-emacs-directory)))
     ;; loaddefs-generate leaves an unchanged file alone, so its time is
-    ;; stale and it would rescan every start; touch it after a scan
-    (when (seq-some (lambda (el) (file-newer-than-file-p el file))
-                    (directory-files dir t "\\.el\\'"))
+    ;; stale and it would rescan every start; touch it after a scan.  DIR's
+    ;; own time changes when a file is added, removed or renamed, and only
+    ;; a full regeneration drops a removed file's entries.
+    (when (seq-some (lambda (f) (file-newer-than-file-p f file))
+                    (cons dir (directory-files dir t "\\.el\\'")))
       (make-directory (file-name-directory file) t)
-      (loaddefs-generate dir file)
+      (loaddefs-generate dir file nil nil nil t)
       (set-file-times file))
     (load file nil t)))
 
