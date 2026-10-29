@@ -26,8 +26,8 @@
 ;;   (define-key evil-motion-state-map (kbd "RET") nil))
 
 (use-package evil-collection
-  :demand t
-  :after evil
+  ;; once idle: it sets up every mode already loaded, so nothing is missed
+  :defer 1
   :init
   (setq forge-add-default-bindings nil)
   :config
@@ -57,7 +57,10 @@
 
 
 (use-package which-key
-  :hook (after-init . which-key-mode))
+  :ensure nil
+  :defer 1
+  :config
+  (which-key-mode 1))
 
 (use-package hydra
   :demand t)

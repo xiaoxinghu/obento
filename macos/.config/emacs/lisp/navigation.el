@@ -197,9 +197,11 @@
 
   )
 
-(with-eval-after-load 'dired
-	(evil-collection-define-key 'normal 'dired-mode-map
-		"a" '+macos-open-with))
+;; after evil-collection-init (keybindings.el), so this runs after its dired setup
+(with-eval-after-load 'evil-collection
+  (with-eval-after-load 'dired
+	  (evil-collection-define-key 'normal 'dired-mode-map
+		  "a" '+macos-open-with)))
 
 (use-package casual-dired
   :disabled t
@@ -220,11 +222,13 @@
 
 ;; search
 (use-package anzu
-  :hook (after-init . global-anzu-mode))
+  :defer 1
+  :config
+  (global-anzu-mode 1))
 
 (use-package evil-anzu
   :demand t
-  :after evil
+  :after (evil anzu)
   :config
   (require 'evil-anzu))
 
@@ -232,7 +236,9 @@
 (setq initial-buffer-choice 'remember-notes
       remember-data-file my/now-file
       remember-notes-initial-major-mode 'org-mode
-      remember-notes-auto-save-visited-file t)
+      remember-notes-auto-save-visited-file t
+      ;; *scratch* is never what shows at startup; spare it the prog-mode hooks
+      initial-major-mode 'fundamental-mode)
 
 ;; find file TODO: assign keys
 (use-package affe

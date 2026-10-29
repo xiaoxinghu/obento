@@ -4,6 +4,10 @@
 	:ensure nil
 	:custom
 	(org-directory my/files-location)
+	;; no ol-* modules: ol-gnus alone drags in gnus, url, shr, smime
+	(org-modules nil)
+	;; no citations in my notes; spares oc-basic and bibtex
+	(org-cite-activate-processor nil)
 	(org-src-preserve-indentation t)
 	(org-pretty-entities-include-sub-superscripts nil)
 	(org-goto-interface 'outline-path-completion)
@@ -78,18 +82,22 @@
 	(setq org-link-frame-setup
 				'((file . find-file)))
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
-  (require 'org-protocol)
-  (require 'org-archive)
+  ;; org-protocol only has to be there before a capture link arrives;
+  ;; org-archive's commands are autoloaded
+  (run-with-idle-timer 1 nil #'require 'org-protocol)
 
   ;; templates
 
   ;; insert mode when capture
   (add-hook 'org-capture-mode-hook 'evil-insert-state)
 
-  ;; babel
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((python . t) (shell . t) (C . t) (ditaa . t)))
+  ;; babel: load the languages on the first block run, not with org
+  (defun my/org-babel-load-languages (&rest _)
+    (advice-remove 'org-babel-execute-src-block #'my/org-babel-load-languages)
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((python . t) (shell . t) (C . t) (ditaa . t))))
+  (advice-add 'org-babel-execute-src-block :before #'my/org-babel-load-languages)
   (setq org-babel-python-command "python3"
 				org-confirm-babel-evaluate nil)
 
@@ -169,9 +177,8 @@ _SPC_ send        _q_ quit
 ;; Got this from [[https://wohanley.com/posts/org-setup/][this post]].
 
 ;; (setq my/org-agenda-directory (expand-file-name "todo" org-directory))
-(require 'find-lisp)
-
 (defun my/find-org-files (directory)
+  (require 'find-lisp)
   (find-lisp-find-files directory "\.org$"))
 
 (defun who-org/agenda-files-update (&rest _)

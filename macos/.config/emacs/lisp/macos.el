@@ -59,12 +59,4 @@
 	:commands (launcher)
   :local "~/workspace/launcher.el")
 
-(use-package present
-	:demand t
-  :local "~/workspace/present.el")
-
-(use-package commander
-	:demand t
-  :local "~/workspace/commander.el")
-
 (provide 'macos)

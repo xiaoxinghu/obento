@@ -9,8 +9,7 @@
 (setq use-package-always-defer t)
 
 ;; (setenv "GPG_TTY" "$(tty)")
-(require 'epa-file)
-(epa-file-enable)
+;; .gpg files: epa-hook, preloaded, loads epa-file when one is visited
 (setenv "GPG_AGENT_INFO" nil)
 (setq epg-gpg-program "/run/current-system/sw/bin/gpg")
 (setq epg-pinentry-mode 'loopback)
@@ -23,12 +22,23 @@
   (unless (server-running-p)
     (server-start)))
 
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+;; not required: package.el loads url and browse-url, and startup needs only
+;; package-activate; it loads when a package has to be installed
+(with-eval-after-load 'package
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t))
 
 (require 'use-package)
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
+;; `use-package-ensure-elpa' loads package.el only to ask what package-activate
+;; already knows from the quickstart; ask first, install what is missing.
+(setq use-package-ensure-function
+      (lambda (name args state &optional no-refresh)
+        (unless (seq-every-p (lambda (e)
+                               (package-installed-p
+                                (if (eq e t) (use-package-as-symbol name) (or (car-safe e) e))))
+                             (remq nil args))
+          (use-package-ensure-elpa name args state no-refresh))))
 
 ;; `:local DIR' loads a package from my checkout when DIR exists, in place
 ;; of `:vc' or `:ensure'.  Without DIR and without `:vc', the package is skipped.
@@ -39,8 +49,15 @@
   "Load the autoloads of package NAME from DIR, regenerated when stale."
   (let ((file (expand-file-name (format "var/autoloads/%s-autoloads.el" name)
                                 user-emacs-directory)))
-    (make-directory (file-name-directory file) t)
-    (loaddefs-generate dir file)
+    ;; loaddefs-generate leaves an unchanged file alone, so its time is
+    ;; stale and it would rescan every start; touch it after a scan.  DIR's
+    ;; own time changes when a file is added, removed or renamed, and only
+    ;; a full regeneration drops a removed file's entries.
+    (when (seq-some (lambda (f) (file-newer-than-file-p f file))
+                    (cons dir (directory-files dir t "\\.el\\'")))
+      (make-directory (file-name-directory file) t)
+      (loaddefs-generate dir file nil nil nil t)
+      (set-file-times file))
     (load file nil t)))
 
 (defun use-package-normalize/:local (_name keyword args)
@@ -60,19 +77,15 @@
    ((plist-member rest :vc)
     (use-package-process-keywords name rest state))))
 
-(use-package exec-path-from-shell
-  :demand t
-  :config
-  (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH" "ASPELL_CONF" "DICPATH" "CFLAGS" "LDFLAGS" "PKG_CONFIG_PATH" "XDG_DATA_HOME" "XDG_CONFIG_HOME" "XDG_CACHE_HOME"))
-    (add-to-list 'exec-path-from-shell-variables var))
-  (exec-path-from-shell-initialize)
-  (if (and (fboundp 'native-comp-available-p)
+;; PATH and the shell's variables come from ~/.env.el, written by env.sh and
+;; loaded in early-init.el, so no shell runs at startup.
+(if (and (fboundp 'native-comp-available-p)
 					 (native-comp-available-p))
       (progn
 				(message "Native comp is available")
 	  ;;; Using Emacs.app/Contents/MacOS/bin since it was compiled with
 	  ;;; ./configure --prefix="$PWD/nextstep/Emacs.app/Contents/MacOS"
-	  ;;; Append to path to give priority to values from exec-path-from-shell-initialize.
+	  ;;; Append to path to give priority to values from ~/.env.el.
 				(add-to-list 'exec-path (concat invocation-directory (file-name-as-directory "bin")) t)
 				(setenv "LIBRARY_PATH" (concat (getenv "LIBRARY_PATH")
 																			 (when (getenv "LIBRARY_PATH")
@@ -83,7 +96,7 @@
 	  ;;; Only set after LIBRARY_PATH can find gcc libraries.
 				(setq comp-deferred-compilation t)
 				(setq comp-speed 3))
-    (message "Native comp is *not* available")))
+    (message "Native comp is *not* available"))
 
 
 (use-package no-littering
@@ -118,7 +131,9 @@
 (use-package direnv
   :custom
   (direnv-always-show-summary nil)
-  :hook (after-init . direnv-mode))
+  :defer 1
+  :config
+  (direnv-mode 1))
 
 (use-package auth-source
 	:ensure nil

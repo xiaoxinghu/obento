@@ -133,9 +133,12 @@
   (("s-/" . ghost-ask)
    ("s-j" . ghost-transcript))
   :config
-  (ghost-define-command ghost-explain
-    "Explain the word, then use it in 3 sentences, then translate it into Chinese."
-    :effort "low")
+  ;; quoted: this file is not compiled, and Emacs eagerly expands macros in
+  ;; the deferred :config, which would load ghost at startup for this one
+  (eval '(ghost-define-command ghost-explain
+           "Explain the word, then use it in 3 sentences, then translate it into Chinese."
+           :effort "low")
+        t)
   (evil-define-key '(normal motion) ghost-transcript-mode-map
     "q" #'quit-window
     "n" #'ghost-next-turn

@@ -2,8 +2,9 @@
 
 (setq sgml-basic-offset 'tab)
 
-(setopt treesit-enabled-modes t
-        treesit-auto-install-grammar 'always)
+;; not `setopt': it loads cus-edit; this runs the :set functions all the same
+(custom-set-variables '(treesit-enabled-modes t)
+                      '(treesit-auto-install-grammar 'always))
 
 (add-hook 'python-mode-hook
 					(lambda ()
@@ -11,33 +12,22 @@
 						;; (setq tab-width 4)
 						(setq py-indent-tabs-mode nil)))
 
-(use-package combobulate
-  :disabled t
-  :vc (:url "https://github.com/mickeynp/combobulate" :rev :newest)
-  :custom
-  ;; You can customize Combobulate's key prefix here.
-  ;; Note that you may have to restart Emacs for this to take effect!
-  (combobulate-key-prefix "C-c o")
-  :hook (
-         (prog-mode . combobulate-mode)
-         (typescript-ts-mode . combobulate-mode)
-         (html-ts-mode . combobulate-mode)
-         )
-  ;; :load-path ("~/.config/emacs/packages/combobulate")
-  )
-
 (use-package evil-textobj-tree-sitter
-  :demand t
-  :after evil
+  :defer 1
   :config
-  ;; bind `function.outer`(entire function block) to `f` for use in things like `vaf`, `yaf`
-  (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
-  (define-key evil-outer-text-objects-map "v" (evil-textobj-tree-sitter-get-textobj "parameter.outer"))
-  ;; bind `function.inner`(function block without name and args) to `f` for use in things like `vif`, `yif`
-  (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
+  ;; quoted: the macro is autoloaded, and eager expansion of this :config
+  ;; would load the package at startup (see ghost in ai.el)
+  (eval
+   '(progn
+      ;; bind `function.outer`(entire function block) to `f` for use in things like `vaf`, `yaf`
+      (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
+      (define-key evil-outer-text-objects-map "v" (evil-textobj-tree-sitter-get-textobj "parameter.outer"))
+      ;; bind `function.inner`(function block without name and args) to `f` for use in things like `vif`, `yif`
+      (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
 
-  ;; You can also bind multiple items and we will match the first one we can find
-  (define-key evil-outer-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj ("conditional.outer" "loop.outer")))
+      ;; You can also bind multiple items and we will match the first one we can find
+      (define-key evil-outer-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj ("conditional.outer" "loop.outer"))))
+   t)
   ;; Goto start of next function
   (define-key evil-normal-state-map
               (kbd "]f")
@@ -71,8 +61,9 @@
   :custom
   ;; depth 3 is <host>/<owner>/<repo>: every clone and its <repo>.<branch> worktrees
   (projectile-project-search-path '(("~/code/" . 3)))
-  :hook (after-init . projectile-mode)
+  :defer 1
   :config
+  (projectile-mode 1)
   (setq projectile-completion-system 'default)
 
   (defhydra hydra-project (:hint nil)
@@ -124,6 +115,11 @@
 
 (use-package magit
   :commands (magit-status magit-blame)
+  :init
+  ;; Revert file buffers that git changes.  Magit turns this on at after-init
+  ;; from its autoloads, which package-quickstart skips; on when idle instead,
+  ;; as it loads magit's git layer and runs git for every file buffer.
+  (run-with-idle-timer 2 nil #'magit-auto-revert-mode 1)
   :custom
   ;; Open magit in the current window; `q' restores the previous buffer there
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
@@ -268,9 +264,12 @@ the repository's git directory, so the same range reopens with its marks."
 					'executable-make-buffer-file-executable-if-script-p)
 
 (use-package editorconfig
+  :ensure nil
   :custom
   (editorconfig-exclude-modes '(org-mode))
-  :hook (after-init . editorconfig-mode))
+  :defer 1
+  :config
+  (editorconfig-mode 1))
 
 (with-eval-after-load 'editorconfig
   (add-to-list 'editorconfig-indentation-alist
@@ -294,8 +293,15 @@ the repository's git directory, so the same range reopens with its marks."
 	)
 
 ;; Code folding. TBH, I don't fold my code.
-(use-package origami
-  :hook (prog-mode . origami-mode))
+(use-package origami)
+
+;; Not in hidden buffers: org fontifies each source block in a hidden buffer
+;; in the block's mode, which loaded yasnippet and origami as now.org opened.
+(defun my/prog-mode-extras ()
+  (unless (string-prefix-p " " (buffer-name))
+    (yas-minor-mode 1)
+    (origami-mode 1)))
+(add-hook 'prog-mode-hook #'my/prog-mode-extras)
 
 (use-package eldoc
   :ensure nil
@@ -327,8 +333,7 @@ the repository's git directory, so the same range reopens with its marks."
   :custom
   (yas-snippet-dirs `(,(expand-file-name "snippets" user-emacs-directory)))
   ;; (yas-snippet-dirs '("~/.config/emacs/snippets"))
-	:hook ((prog-mode . yas-minor-mode)
-	       ((typescript-ts-mode tsx-ts-mode) . my/yas-typescript-snippets))
+	:hook ((typescript-ts-mode tsx-ts-mode) . my/yas-typescript-snippets)
 	:config
 	(yas-reload-all t))
 
@@ -353,16 +358,7 @@ the repository's git directory, so the same range reopens with its marks."
   ;; If you do not want to use any prefix, set it to nil.
   ;; (setq dape-key-prefix "\C-x\C-a")
 
-  :hook
-  ;; Save breakpoints on quit
-  (kill-emacs . dape-breakpoint-save)
-  ;; Load breakpoints on startup
-  (after-init . dape-breakpoint-load)
-
   :custom
-  ;; Turn on global bindings for setting breakpoints with mouse
-  (dape-breakpoint-global-mode +1)
-
   ;; Info buffers to the right
   ;; (dape-buffer-window-arrangement 'right)
   ;; Info buffers like gud (gdb-mi)
@@ -373,6 +369,11 @@ the repository's git directory, so the same range reopens with its marks."
   (dape-cwd-function #'projectile-project-root)
 
   :config
+  ;; on first use, not at startup: `:custom' on the autoloaded mode loaded dape,
+  ;; and saving on quit is only safe once the saved breakpoints were loaded
+  (dape-breakpoint-global-mode +1)
+  (dape-breakpoint-load)
+  (add-hook 'kill-emacs-hook #'dape-breakpoint-save)
 
 	(defhydra hydra-debug (:color pink :hint nil)
 		"
