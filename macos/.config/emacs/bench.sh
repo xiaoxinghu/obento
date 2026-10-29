@@ -24,7 +24,8 @@ mkdir -p "$dir"
     (setq package-quickstart-file (expand-file-name "var/package-quickstart.el" user-emacs-directory))
     (package-quickstart-refresh))' >"$dir/run.log" 2>&1
 }
-rm -rf "$dir/lisp"; cp -R "$src/lisp" "$dir/lisp"
+# times kept, so the config's own autoloads are not regenerated every run
+rsync -a --delete "$src/lisp/" "$dir/lisp/"
 # early-init.el: the clock, started before anything else, after the cookie line
 { head -1 "$src/early-init.el"; cat <<'EL'
 (defvar bench/t0 (string-to-number (getenv "BENCH_T0")))
