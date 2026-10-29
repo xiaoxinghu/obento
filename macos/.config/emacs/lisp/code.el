@@ -308,8 +308,15 @@ the repository's git directory, so the same range reopens with its marks."
 	)
 
 ;; Code folding. TBH, I don't fold my code.
-(use-package origami
-  :hook (prog-mode . origami-mode))
+(use-package origami)
+
+;; Not in hidden buffers: org fontifies each source block in a hidden buffer
+;; in the block's mode, which loaded yasnippet and origami as now.org opened.
+(defun my/prog-mode-extras ()
+  (unless (string-prefix-p " " (buffer-name))
+    (yas-minor-mode 1)
+    (origami-mode 1)))
+(add-hook 'prog-mode-hook #'my/prog-mode-extras)
 
 (use-package eldoc
   :ensure nil
@@ -341,8 +348,7 @@ the repository's git directory, so the same range reopens with its marks."
   :custom
   (yas-snippet-dirs `(,(expand-file-name "snippets" user-emacs-directory)))
   ;; (yas-snippet-dirs '("~/.config/emacs/snippets"))
-	:hook ((prog-mode . yas-minor-mode)
-	       ((typescript-ts-mode tsx-ts-mode) . my/yas-typescript-snippets))
+	:hook ((typescript-ts-mode tsx-ts-mode) . my/yas-typescript-snippets)
 	:config
 	(yas-reload-all t))
 
