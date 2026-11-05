@@ -180,6 +180,14 @@
   (kbd "M-/") 'dabbrev-completion
   (kbd "C-M-/") 'dabbrev-expand)
 
+;; Unmodified file buffers follow the disk, whoever wrote it (agents, git),
+;; tracked or not.  Replaces `magit-auto-revert-mode', which magit turns off.
+(use-package autorevert
+  :ensure nil
+  :defer 1
+  :config
+  (global-auto-revert-mode 1))
+
 (use-package dired
   :ensure nil
   :init

@@ -115,11 +115,6 @@
 
 (use-package magit
   :commands (magit-status magit-blame)
-  :init
-  ;; Revert file buffers that git changes.  Magit turns this on at after-init
-  ;; from its autoloads, which package-quickstart skips; on when idle instead,
-  ;; as it loads magit's git layer and runs git for every file buffer.
-  (run-with-idle-timer 2 nil #'magit-auto-revert-mode 1)
   :custom
   ;; Open magit in the current window; `q' restores the previous buffer there
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
@@ -469,9 +464,10 @@ _c_: continue     _L_: log message     _D_: disconnect
   )
 
 ;; For a more ergonomic Emacs and `dape' experience
-;; (use-package repeat
-;;   :custom
-;;   (repeat-mode +1))
+(use-package repeat
+  :ensure nil
+  :custom
+  (repeat-mode +1))
 
 ;; Left and right side windows occupy full frame height
 (use-package emacs

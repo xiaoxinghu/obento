@@ -55,8 +55,22 @@
 
 (use-package emacs-everywhere)
 
+(use-package osx-dictionary)
+
+(use-package take
+  :local "~/ws/.repos/github.com/xiaoxinghu/take/emacs"
+  :commands (take-prepare)
+  :hook (take-prepare . my/keycast-mode)   ; show the keys in the recording frame
+  :custom
+  (take-default-preset 'youtube))
+
 (use-package launcher
-	:commands (launcher)
-  :local "~/workspace/launcher.el")
+  :local "~/workspace/launcher.el/"
+  :commands (launcher launcher-buffer launcher-refresh)
+  :config
+  (require 'launcher-osx-dictionary)
+  (setq launcher-tools
+        '(("d" :name "Dictionary" :prompt "Word: "
+           :function launcher-osx-dictionary-lookup))))
 
 (provide 'macos)

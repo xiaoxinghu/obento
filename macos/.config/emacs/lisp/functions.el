@@ -183,6 +183,88 @@ If LANG is nil, prompt for it."
                  1 2 3 2))
   (add-to-list 'compilation-error-regexp-alist 'bun-test))
 
+(require 'json)
+(require 'project)
+(require 'subr-x)
+
+(defun my/project-root ()
+  "Return the current project root, or `default-directory'."
+  (if-let* ((project (project-current nil)))
+      (project-root project)
+    default-directory))
+
+(defun my/package-root ()
+  "Return the nearest parent directory containing package.json."
+  (locate-dominating-file default-directory "package.json"))
+
+(defun my/read-json-file (file)
+  "Read FILE as a hash-table JSON object."
+  (if (fboundp 'json-parse-file)
+      (json-parse-file file :object-type 'hash-table :array-type 'list)
+    (let ((json-object-type 'hash-table)
+          (json-array-type 'list)
+          (json-key-type 'string))
+      (json-read-file file))))
+
+(defun my/package-json (root)
+  "Read package.json under ROOT."
+  (let ((file (expand-file-name "package.json" root)))
+    (when (file-exists-p file)
+      (ignore-errors (my/read-json-file file)))))
+
+(defun my/package-scripts (root)
+  "Return package.json script names under ROOT."
+  (let* ((pkg (my/package-json root))
+         (scripts (and pkg (gethash "scripts" pkg))))
+    (when (hash-table-p scripts)
+      (sort (hash-table-keys scripts) #'string<))))
+
+(defun my/package-manager (root)
+  "Guess the package manager for ROOT."
+  (let* ((pkg (my/package-json root))
+         (declared (and pkg (gethash "packageManager" pkg))))
+    (or (and (stringp declared) (car (split-string declared "@")))
+        (cond
+         ((or (file-exists-p (expand-file-name "bun.lock" root))
+              (file-exists-p (expand-file-name "bun.lockb" root))) "bun")
+         ((file-exists-p (expand-file-name "pnpm-lock.yaml" root)) "pnpm")
+         ((file-exists-p (expand-file-name "yarn.lock" root)) "yarn")
+         (t "npm")))))
+
+(defun my/package-script-command (root script)
+  "Return shell command to run SCRIPT under ROOT."
+  (format "%s run %s" (my/package-manager root) (shell-quote-argument script)))
+
+(defun my/run-package-script ()
+  "Run a package.json script with `compile'."
+  (interactive)
+  (let* ((root (or (my/package-root)
+                   (user-error "No package.json found")))
+         (scripts (or (my/package-scripts root)
+                      (user-error "No scripts in package.json")))
+         (script (completing-read "Script: " scripts nil t nil nil
+                                  (or (car (member "build" scripts))
+                                      (car scripts))))
+         (default-directory root))
+    (compile (read-shell-command "Compile command: "
+                                 (my/package-script-command root script)))))
+
+(defun my/project-compile ()
+  "Run `compile' from the project root with a Make/JS-aware default."
+  (interactive)
+  (let* ((package-root (my/package-root))
+         (root (or package-root (my/project-root)))
+         (scripts (and package-root (my/package-scripts package-root)))
+         (default-directory root)
+         (cmd (cond
+               ((file-exists-p (expand-file-name "Makefile" root)) "make -k")
+               ((and package-root (member "build" scripts))
+                (my/package-script-command package-root "build"))
+               ((and package-root (member "test" scripts))
+                (my/package-script-command package-root "test"))
+               (t compile-command))))
+    (compile (read-shell-command "Compile command: " cmd))))
+
 (defvar my/runner-alist
   '(
 		(("ts" "js") . "bun %f")
