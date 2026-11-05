@@ -29,7 +29,6 @@
 (require 'checker)
 (require 'code)
 ;; modules not required here load through their ;;;###autoload cookies
-;; (diff-review: when a review file is visited or made)
 (+use-package--local-autoloads 'lisp (expand-file-name "lisp" user-emacs-directory))
 (require 'use-eglot)
 ;; (require 'use-lsp)
