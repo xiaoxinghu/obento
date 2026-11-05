@@ -156,6 +156,23 @@ the repository's git directory, so the same range reopens with its marks."
     (diff-review-find-file (magit-git-dir (format "review/%s..%s.json" old new))
                            (magit-toplevel) (concat old "^") new)))
 
+;; Loads through its autoloads, when a review file is visited or made.  The
+;; lists' evil keys are the package's and evil-collection's (C-j, ]] walk the
+;; tree); a file under review gets vim keys here.  Not ]] [[ (org's heading
+;; moves) nor gq (fill): ]c and zv cross files anyway, C-c _ q quits.
+(use-package diff-review
+  :vc (:url "https://github.com/xiaoxinghu/diff-review" :rev :newest)
+  :defer t
+  :config
+  (evil-define-minor-mode-key 'normal 'diff-review-file-mode
+    "]c" #'diff-review-next-hunk
+    "[c" #'diff-review-previous-hunk
+    "zv" #'diff-review-viewed-and-next
+    "zf" #'diff-review-toggle-focus
+    "zd" #'diff-review-toggle-inline-removed
+    "gs" #'diff-review-toggle-sidebar
+    "gl" #'diff-review-overview))
+
 (defhydra hydra-merge (:color blue :hint nil)
   "
   ^Navigation^           ^Actions^
