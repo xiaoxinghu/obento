@@ -161,6 +161,7 @@ the repository's git directory, so the same range reopens with its marks."
 ;; tree); a file under review gets vim keys here.  Not ]] [[ (org's heading
 ;; moves) nor gq (fill): ]c and zv cross files anyway, C-c _ q quits.
 (use-package diff-review
+  :local "~/ws/.repos/github.com/xiaoxinghu/diff-review"
   :vc (:url "https://github.com/xiaoxinghu/diff-review" :rev :newest)
   :defer t
   :config
