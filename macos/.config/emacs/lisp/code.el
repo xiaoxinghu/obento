@@ -140,15 +140,30 @@
 (defun my/magit-review-region ()
   "Review the commits selected in a magit log, the oldest included, with diff-review.
 Without a selection, review the commit at point.  The review file lives in
-the repository's git directory, so the same range reopens with its marks."
+the common git directory, so the same range reopens with its marks from any
+worktree and outlives them.  When the newest commit is a branch tip, the
+branch is the head: the review follows it, in the branch's one file, the
+one `diff-review-branch' opens."
   (interactive)
   (let* ((revs (or (magit-region-values '(commit branch) t)
                    (list (or (magit-commit-at-point) (user-error "No commit here")))))
-         (new (magit-rev-abbrev (car revs)))
-         (old (magit-rev-abbrev (car (last revs)))))
+         (tips (if (magit-local-branch-p (car revs))
+                   (list (car revs))
+                 (magit-git-lines "for-each-ref" "--points-at" (car revs)
+                                  "--format=%(refname:short)" "refs/heads/")))
+         (branch (if (member (magit-get-current-branch) tips)
+                     (magit-get-current-branch)
+                   (car tips)))
+         (new (or branch (magit-rev-abbrev (car revs))))
+         (old (magit-rev-abbrev (car (last revs))))
+         (dir (expand-file-name "review/" (expand-file-name (magit-rev-parse "--git-common-dir")
+                                                            (magit-toplevel)))))
     (deactivate-mark)
     (when (bound-and-true-p evil-local-mode) (evil-normal-state))
-    (diff-review-find-file (magit-git-dir (format "review/%s..%s.json" old new))
+    (diff-review-find-file (expand-file-name (if branch
+                                                 (concat branch ".json")
+                                               (format "%s..%s.json" old new))
+                                             dir)
                            (magit-toplevel) (concat old "^") new)))
 
 ;; Loads through its autoloads, when a review file is visited or made.  The
