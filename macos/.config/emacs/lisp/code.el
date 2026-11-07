@@ -134,6 +134,10 @@
   (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-pushremote)
   (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-upstream)
   (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-upstream-or-recent)
+  ;; The other worktrees' branches, each with its review's state; RET opens it.
+  ;; Here, not in diff-review's :init: before magit loads, add-hook would make
+  ;; the hook just this, and magit's defcustom would keep it.
+  (add-hook 'magit-status-sections-hook #'diff-review-magit-insert-worktrees t)
   (evil-define-key '(normal visual) magit-log-mode-map (kbd "gd") #'my/magit-review-region)
   )
 
