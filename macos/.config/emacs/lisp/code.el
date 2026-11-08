@@ -60,7 +60,7 @@
 (use-package projectile
   :custom
   ;; depth 3 is <host>/<owner>/<repo>: every clone and its <repo>.<branch> worktrees
-  (projectile-project-search-path '(("~/code/" . 3)))
+  (projectile-project-search-path '(("~/src/" . 3)))
   :defer 1
   :config
   (projectile-mode 1)
@@ -175,7 +175,7 @@ one `diff-review-branch' opens."
 ;; tree); a file under review gets vim keys here.  Not ]] [[ (org's heading
 ;; moves) nor gq (fill): ]c and zv cross files anyway, C-c _ q quits.
 (use-package diff-review
-  :local "~/ws/.repos/github.com/xiaoxinghu/diff-review"
+  :local "~/src/github.com/xiaoxinghu/diff-review"
   :vc (:url "https://github.com/xiaoxinghu/diff-review" :rev :newest)
   :defer t
   :config
