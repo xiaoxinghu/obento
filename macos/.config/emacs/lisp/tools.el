@@ -191,8 +191,8 @@
 (use-package portal
   :local "~/src/github.com/xiaoxinghu/portal"
   :vc (:url "https://github.com/xiaoxinghu/portal" :rev :newest)
-	;; once idle: portal-web loads url and browse-url; s-t and Command-Space
-	;; are there a second after the frame
+	;; once idle: portal-web loads url and browse-url; s-t is there a second
+	;; after the frame
 	:defer 1
   :bind (("s-p" . hydra-portal/body))
 	:custom
@@ -246,7 +246,6 @@ From inside the only terminal, choose too, so a new one is a key away."
 														"s-T" #'portal-terminal-toggle)
 
   (require 'portal-launcher)
-  (require 'portal-global-shortcut)
 
   (defun my/app-launcher ()
     "Launch apps, search the web, or query tools in Portal's panel.
@@ -257,10 +256,7 @@ With a prefix argument, rebuild the application index first."
           (portal-launcher-height-limits '(content 480)))
       (portal-launcher-present #'launcher-buffer
                                :kind 'buffer
-                               :mode-line nil)))
-
-  (portal-global-shortcut-set 'app-launcher "Command-Space"
-                              #'my/app-launcher))
+                               :mode-line nil))))
 
 ;; Working a task: herdr, Claude and the review loop.  See ~/src/github.com/xiaoxinghu/flow.
 (use-package flow

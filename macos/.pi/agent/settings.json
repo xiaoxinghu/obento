@@ -1,7 +1,8 @@
 {
-  "lastChangelogVersion": "0.80.6",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-terra",
-  "defaultThinkingLevel": "low",
-  "theme": "dark"
+  "lastChangelogVersion": "1.1.0",
+  "defaultProvider": "openai",
+  "defaultModel": "gpt-6-astra",
+  "defaultThinkingLevel": "high",
+  "theme": "dark",
+  "deviceId": "93c8eef3-c9aa-4161-ad11-c12e9a549e70"
 }

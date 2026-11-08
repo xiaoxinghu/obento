@@ -12,6 +12,7 @@ brew "mise"
 brew "git"
 brew "tmux"
 brew "pass"
+brew "ffmpeg"  # decodes audio and video for dictate --input
 
 # GUI apps + fonts
 cask "ghostty"
