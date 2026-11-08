@@ -188,25 +188,8 @@
 (use-package links
   :local "~/workspace/links.el")
 
-(use-package ws
-  :local "~/code/github.com/xiaoxinghu/ws/emacs"
-	:commands (ws-tasks ws-task-list ws-add ws-claim ws-done ws-visit ws-visit-worktree ws-finish)
-	:config
-	(evil-define-key 'normal ws-tasks-mode-map
-		(kbd "RET") #'ws-visit
-		(kbd "TAB") #'ws-tasks-toggle-folder
-		(kbd "<tab>") #'ws-tasks-toggle-folder
-		"D" #'ws-tasks-toggle-done
-		"a" #'ws-add
-		"c" #'ws-claim
-		"d" #'ws-done
-		"i" #'flow-implement
-		"r" #'flow-diff
-		"w" #'ws-visit-worktree
-		"x" #'ws-finish))
-
 (use-package portal
-  :local "~/code/github.com/xiaoxinghu/portal"
+  :local "~/src/github.com/xiaoxinghu/portal"
   :vc (:url "https://github.com/xiaoxinghu/portal" :rev :newest)
 	;; once idle: portal-web loads url and browse-url; s-t and Command-Space
 	;; are there a second after the frame
@@ -279,9 +262,9 @@ With a prefix argument, rebuild the application index first."
   (portal-global-shortcut-set 'app-launcher "Command-Space"
                               #'my/app-launcher))
 
-;; Working a task: ws, herdr, Claude and the review loop.  See ~/code/github.com/xiaoxinghu/flow.
+;; Working a task: herdr, Claude and the review loop.  See ~/src/github.com/xiaoxinghu/flow.
 (use-package flow
-  :local "~/code/github.com/xiaoxinghu/flow/emacs"
+  :local "~/src/github.com/xiaoxinghu/flow/emacs"
 	:commands (flow-implement flow-diff))
 
 (provide 'tools)

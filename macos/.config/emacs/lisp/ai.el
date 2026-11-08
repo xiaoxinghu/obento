@@ -126,7 +126,7 @@
 ;;; ghost - the durable agent over ~/files, through its CLI
 ;; Loaded from the justfiles clone, so it follows main like the `ghost' CLI does.
 (use-package ghost
-  :local "~/code/github.com/justfiles/justfiles/packages/shell/emacs"
+  :local "~/src/github.com/justfiles/justfiles/packages/shell/emacs"
   :commands (ghost-ask ghost-ask-insert ghost-steer ghost-abort ghost-new ghost-transcript
              ghost-explain)
 	:bind

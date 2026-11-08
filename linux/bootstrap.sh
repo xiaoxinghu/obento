@@ -104,7 +104,7 @@ USER_HOME="$(getent passwd "$USERNAME" | cut -d: -f6)"
 # Where the repo lives: $OBENTO_PATH if set, else where setup.sh recorded it on
 # an earlier run, else the ws code layout. Move it later with `obento move`.
 [[ -n "${OBENTO_PATH:-}" ]] || OBENTO_PATH="$(sed -n 's/^export OBENTO_PATH=//p' "$USER_HOME/.config/zsh/local.zshenv" 2>/dev/null || true)"
-DEST="${OBENTO_PATH:-$USER_HOME/code/github.com/xiaoxinghu/obento}"
+DEST="${OBENTO_PATH:-$USER_HOME/src/github.com/xiaoxinghu/obento}"
 
 if [[ -d "$DEST/.git" ]]; then
   echo "Repo already at $DEST, updating..."
