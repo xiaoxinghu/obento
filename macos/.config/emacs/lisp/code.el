@@ -134,50 +134,27 @@
   (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-pushremote)
   (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-upstream)
   (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-upstream-or-recent)
-  ;; The other worktrees' branches, each with its review's state; RET opens it.
-  ;; Here, not in diff-review's :init: before magit loads, add-hook would make
-  ;; the hook just this, and magit's defcustom would keep it.
-  (add-hook 'magit-status-sections-hook #'diff-review-magit-insert-worktrees t)
-  (evil-define-key '(normal visual) magit-log-mode-map (kbd "gd") #'my/magit-review-region)
+  (evil-define-key '(normal visual) magit-log-mode-map (kbd "gd") #'my/magit-review-commits)
   )
 
-(defun my/magit-review-region ()
-  "Review the commits selected in a magit log, the oldest included, with diff-review.
-Without a selection, review the commit at point.  The review file lives in
-the common git directory, so the same range reopens with its marks from any
-worktree and outlives them.  When the newest commit is a branch tip, the
-branch is the head: the review follows it, in the branch's one file, the
-one `diff-review-branch' opens."
+(defun my/magit-review-commits ()
+  "`diff-review-magit-commits', then the log out of visual state."
   (interactive)
-  (let* ((revs (or (magit-region-values '(commit branch) t)
-                   (list (or (magit-commit-at-point) (user-error "No commit here")))))
-         (tips (if (magit-local-branch-p (car revs))
-                   (list (car revs))
-                 (magit-git-lines "for-each-ref" "--points-at" (car revs)
-                                  "--format=%(refname:short)" "refs/heads/")))
-         (branch (if (member (magit-get-current-branch) tips)
-                     (magit-get-current-branch)
-                   (car tips)))
-         (new (or branch (magit-rev-abbrev (car revs))))
-         (old (magit-rev-abbrev (car (last revs))))
-         (dir (expand-file-name "review/" (expand-file-name (magit-rev-parse "--git-common-dir")
-                                                            (magit-toplevel)))))
-    (deactivate-mark)
-    (when (bound-and-true-p evil-local-mode) (evil-normal-state))
-    (diff-review-find-file (expand-file-name (if branch
-                                                 (concat branch ".json")
-                                               (format "%s..%s.json" old new))
-                                             dir)
-                           (magit-toplevel) (concat old "^") new)))
+  (let ((log (current-buffer)))
+    (diff-review-magit-commits)
+    (with-current-buffer log (evil-normal-state))))
 
-;; Loads through its autoloads, when a review file is visited or made.  The
-;; lists' evil keys are the package's and evil-collection's (C-j, ]] walk the
+;; The magit glue is on at startup, with no magit loaded: the worktrees
+;; section in magit-status and `d v' (the mode waits for magit).  The lists'
+;; evil keys are the package's and evil-collection's (C-j, ]] walk the
 ;; tree); a file under review gets vim keys here.  Not ]] [[ (org's heading
 ;; moves) nor gq (fill): ]c and zv cross files anyway, C-c _ q quits.
 (use-package diff-review
   :local "~/src/github.com/xiaoxinghu/diff-review"
   :vc (:url "https://github.com/xiaoxinghu/diff-review" :rev :newest)
   :defer t
+  :init
+  (diff-review-magit-mode)
   :config
   (evil-define-minor-mode-key 'normal 'diff-review-file-mode
     "]c" #'diff-review-next-hunk
