@@ -144,8 +144,9 @@
     (diff-review-magit-commits)
     (with-current-buffer log (evil-normal-state))))
 
-;; The magit glue is on at startup, with no magit loaded: the worktrees
-;; section in magit-status and `d v' (the mode waits for magit).  The lists'
+;; The magit glue, the worktrees section in magit-status and `d v', turns
+;; on when magit loads: the mode's autoload would load diff-review at
+;; startup otherwise.  The lists'
 ;; evil keys are the package's and evil-collection's (C-j, ]] walk the
 ;; tree); a file under review gets vim keys here.  Not ]] [[ (org's heading
 ;; moves) nor gq (fill): ]c and zv cross files anyway, C-c _ q quits.
@@ -154,7 +155,7 @@
   :vc (:url "https://github.com/xiaoxinghu/diff-review" :rev :newest)
   :defer t
   :init
-  (diff-review-magit-mode)
+  (with-eval-after-load 'magit (diff-review-magit-mode))
   :config
   (evil-define-minor-mode-key 'normal 'diff-review-file-mode
     "]c" #'diff-review-next-hunk
