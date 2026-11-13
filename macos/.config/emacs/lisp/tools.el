@@ -189,7 +189,7 @@
   :local "~/workspace/links.el")
 
 (use-package portal
-  :local "~/src/github.com/xiaoxinghu/portal"
+  :local "~/files/workspace/.repos/github.com/xiaoxinghu/portal"
   :vc (:url "https://github.com/xiaoxinghu/portal" :rev :newest)
 	;; once idle: portal-web loads url and browse-url; s-t is there a second
 	;; after the frame
@@ -258,9 +258,9 @@ With a prefix argument, rebuild the application index first."
                                :kind 'buffer
                                :mode-line nil))))
 
-;; Working a task: herdr, Claude and the review loop.  See ~/src/github.com/xiaoxinghu/flow.
+;; Working a task: herdr, Claude and the review loop.  See ~/files/workspace/.repos/github.com/xiaoxinghu/flow.
 (use-package flow
-  :local "~/src/github.com/xiaoxinghu/flow/emacs"
+  :local "~/files/workspace/.repos/github.com/xiaoxinghu/flow/emacs"
 	:commands (flow-implement flow-diff))
 
 (use-package ghostel

@@ -59,8 +59,16 @@
 
 (use-package projectile
   :custom
-  ;; depth 3 is <host>/<owner>/<repo>: every clone and its <repo>.<branch> worktrees
-  (projectile-project-search-path '(("~/src/" . 3)))
+  ;; The checkouts of every ken root under ~/files, each root's .repos/: depth 3 is
+  ;; <host>/<owner>/<repo>, every clone and its <repo>.<branch> worktrees.  Read at
+  ;; startup, so a new root is found after a restart.
+  (projectile-project-search-path
+   (mapcar (lambda (dir) (cons (file-name-as-directory dir) 3))
+           (seq-filter #'file-directory-p (file-expand-wildcards "~/files/*/.repos"))))
+  ;; Discover what is under the search path, and forget projects whose folder is gone,
+  ;; each time a project is switched to: a moved or removed checkout leaves no entry.
+  (projectile-auto-discover t)
+  (projectile-auto-cleanup-known-projects t)
   :defer 1
   :config
   (projectile-mode 1)
@@ -151,7 +159,7 @@
 ;; tree); a file under review gets vim keys here.  Not ]] [[ (org's heading
 ;; moves) nor gq (fill): ]c and zv cross files anyway, C-c _ q quits.
 (use-package diff-review
-  :local "~/src/github.com/xiaoxinghu/diff-review"
+  :local "~/files/workspace/.repos/github.com/xiaoxinghu/diff-review"
   :vc (:url "https://github.com/xiaoxinghu/diff-review" :rev :newest)
   :defer t
   :init

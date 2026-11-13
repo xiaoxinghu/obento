@@ -58,7 +58,7 @@
 (use-package osx-dictionary)
 
 (use-package take
-  :local "~/src/github.com/xiaoxinghu/take/emacs"
+  :local "~/files/workspace/.repos/github.com/xiaoxinghu/take/emacs"
   :commands (take-prepare)
   :hook (take-prepare . my/keycast-mode)   ; show the keys in the recording frame
   :custom
