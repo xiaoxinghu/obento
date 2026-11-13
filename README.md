@@ -18,9 +18,9 @@ Linux (run from a root shell):
 curl -fsSL https://raw.githubusercontent.com/xiaoxinghu/obento/main/linux/bootstrap.sh | bash
 ```
 
-The repo goes to `~/src/github.com/xiaoxinghu/obento`. To put it elsewhere, set
-`OBENTO_PATH`, e.g. `curl ... | OBENTO_PATH=~/dotfiles bash`. Re-runs find it
-where it is.
+The repo goes to `~/.obento`. To put it elsewhere, set `OBENTO_PATH`, e.g.
+`curl ... | OBENTO_PATH=~/dotfiles bash`, or move it later with `obento move <dest>`.
+Re-runs find it where it is.
 
 ## Usage
 
