@@ -263,4 +263,21 @@ With a prefix argument, rebuild the application index first."
   :local "~/src/github.com/xiaoxinghu/flow/emacs"
 	:commands (flow-implement flow-diff))
 
+(use-package ghostel
+  :ensure t)
+
+(use-package rexel
+  :vc (:url "https://github.com/dakra/rexel"
+						:lisp-dir "lisp")
+  ;; Session and block commands from any buffer
+  :bind-keymap ("C-c C-r" . rexel-prefix-map)
+  :custom
+  ;; Show a session's focused block instead of asking what to show
+  (rexel-attach-display 'focused)
+  ;; In a project, M-x rexel uses the project's session
+  (rexel-default-session-function #'rexel-project-session-label)
+  ;; A remote server, over Tailscale or an ssh tunnel to its socket
+  ;; (rexel-hosts '(("studio" "rex.tail1234.ts.net" "/tmp/studio.sock")))
+	)
+
 (provide 'tools)

@@ -31,6 +31,7 @@ gum = "latest"
 gh = "latest"
 tokei = "latest"           # code statistics (lines of code by language)
 awscli = "latest"
+yt-dlp = "latest"
 herdr = "latest"           # agent multiplexer (herdr.dev)
 "github:joshmedeski/sesh" = "latest"
 "npm:@earendil-works/pi-coding-agent" = "latest"

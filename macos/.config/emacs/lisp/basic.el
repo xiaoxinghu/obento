@@ -48,15 +48,21 @@
 (defun +use-package--local-autoloads (name dir)
   "Load the autoloads of package NAME from DIR, regenerated when stale."
   (let ((file (expand-file-name (format "var/autoloads/%s-autoloads.el" name)
-                                user-emacs-directory)))
+                                user-emacs-directory))
+        (stamp (format ";; Source: %s\n" dir)))
     ;; loaddefs-generate leaves an unchanged file alone, so its time is
     ;; stale and it would rescan every start; touch it after a scan.  DIR's
     ;; own time changes when a file is added, removed or renamed, and only
-    ;; a full regeneration drops a removed file's entries.
-    (when (seq-some (lambda (f) (file-newer-than-file-p f file))
-                    (cons dir (directory-files dir t "\\.el\\'")))
+    ;; a full regeneration drops a removed file's entries.  A moved
+    ;; checkout keeps its times, so the file records DIR and is
+    ;; regenerated when DIR differs.
+    (when (or (seq-some (lambda (f) (file-newer-than-file-p f file))
+                        (cons dir (directory-files dir t "\\.el\\'")))
+              (not (with-temp-buffer
+                     (insert-file-contents file)
+                     (search-forward stamp nil t))))
       (make-directory (file-name-directory file) t)
-      (loaddefs-generate dir file nil nil nil t)
+      (loaddefs-generate dir file nil stamp nil t)
       (set-file-times file))
     (load file nil t)))
 

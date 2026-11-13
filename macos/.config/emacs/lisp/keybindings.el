@@ -92,6 +92,20 @@
   ;; (kbd "s-`") 'evil-switch-to-windows-last-buffer
   )
 
+(defun my/global-text-scale (key)
+  "Run `global-text-scale-adjust' as if KEY had invoked it.
+It reads what to do from the key: ?- shrinks, ?0 resets, anything else
+grows.  A shifted key is another character, so it cannot say that itself."
+  (let ((last-command-event key))
+    (global-text-scale-adjust 1)))
+
+;; Command-= and Command-- scale the buffer's text; with Shift, every
+;; buffer's, and Command-Shift-0 brings that back.
+(evil-define-key nil 'global
+  (kbd "s-+") (lambda () (interactive) (my/global-text-scale ?+))
+  (kbd "s-_") (lambda () (interactive) (my/global-text-scale ?-))
+  (kbd "s-)") (lambda () (interactive) (my/global-text-scale ?0)))
+
 (evil-define-key 'normal 'global
   (kbd "<leader>h") '("help" . (keymap))
   (kbd "<leader>hf") '("help" . describe-function)
