@@ -14,13 +14,6 @@
 ;; https://emacs.stackexchange.com/questions/41886/html-mail-background-has-same-color-as-text
 (setq shr-color-visible-luminance-min 80)
 
-;; set transparency
-;; (set-frame-parameter nil 'alpha-background 85) ; Adjust 85 to your desired opacity (0-100)
-;; (add-to-list 'default-frame-alist '(alpha-background . 85)) ; Adjust 85 to your desired opacity
-
-;; (set-frame-parameter (selected-frame) 'alpha '(55 55))
-;; (add-to-list 'default-frame-alist '(alpha 55 55))
-
 ;; ediff
 (setq ediff-split-window-function 'split-window-horizontally)
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)

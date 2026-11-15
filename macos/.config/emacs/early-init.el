@@ -33,7 +33,6 @@
                  (vertical-scroll-bars)
                  (ns-transparent-titlebar . t)
                  (ns-appearance . dark)
-                 (alpha-background . 85)
                  (font . "JetBrainsMono Nerd Font-17")))
   (push param default-frame-alist))
 
