@@ -221,6 +221,12 @@
 
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
 
+;; frosted-glass frames, a package of its own in frost/ until it has a repo
+(use-package frost
+  :ensure nil
+  :load-path "frost"
+  :hook (after-init . frost-mode))
+
 ;; scrolling
 (setq mac-redisplay-dont-reset-vscroll t
       mac-mouse-wheel-smooth-scroll nil)
