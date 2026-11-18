@@ -50,6 +50,60 @@ with `emacsclient -c` or `C-x 5 2`, are frosted as they are made.
 
 ## How it works
 
+<figure>
+<svg viewBox="0 0 800 470" width="100%" role="img" aria-label="frost.el calls the native module, which for every top-level frame's window adds a blurring NSVisualEffectView and a tint below the Emacs view and sets a blend mode on the Emacs view's layer. Back to front: what is behind the window is blurred, tinted, then blended with what Emacs draws." font-family="-apple-system, system-ui, sans-serif" font-size="12">
+  <defs>
+    <marker id="frost-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker>
+  </defs>
+  <g fill="none" stroke="currentColor" stroke-width="1.2">
+    <rect x="40" y="16" width="230" height="64" rx="6"/>
+    <rect x="356" y="16" width="434" height="64" rx="6"/>
+    <path d="M270 48H352" marker-end="url(#frost-arrow)"/>
+    <path d="M372 80V348"/>
+    <path d="M372 192H326" marker-end="url(#frost-arrow)"/>
+    <path d="M372 270H326" marker-end="url(#frost-arrow)"/>
+    <path d="M372 348H326" marker-end="url(#frost-arrow)"/>
+    <path d="M96 404H346L290 448H40Z" stroke-dasharray="5 4"/>
+    <path d="M96 326H346L290 370H40Z" fill="#4a9eda" fill-opacity="0.35"/>
+    <path d="M96 248H346L290 292H40Z" fill="currentColor" fill-opacity="0.2"/>
+    <path d="M96 170H346L290 214H40Z" fill="currentColor" fill-opacity="0.05"/>
+    <path d="M193 400V376" marker-end="url(#frost-arrow)"/>
+    <path d="M193 322V298" marker-end="url(#frost-arrow)"/>
+    <path d="M193 244V220" marker-end="url(#frost-arrow)"/>
+    <path d="M193 166V134" marker-end="url(#frost-arrow)"/>
+  </g>
+  <g fill="none" stroke-width="3" stroke-linecap="round">
+    <path d="M94 183H168" stroke="#c2569b"/>
+    <path d="M81 193H186" stroke="#3f9b6b"/>
+    <path d="M68 203H138" stroke="#d08a2e"/>
+  </g>
+  <g fill="currentColor">
+    <text x="54" y="38" font-size="13" font-weight="600">frost.el</text>
+    <text x="54" y="55" fill-opacity="0.75">when: mode toggled, new frame,</text>
+    <text x="54" y="71" fill-opacity="0.75">theme changed, option set</text>
+    <text x="311" y="41" text-anchor="middle">calls</text>
+    <text x="370" y="38" font-size="13" font-weight="600">frost-module.dylib</text>
+    <text x="370" y="55" fill-opacity="0.75">frost.m, built with clang the first time the mode is on</text>
+    <text x="370" y="71" fill-opacity="0.75" font-family="ui-monospace, Menlo, monospace" font-size="11.5">(frost--apply MODE MATERIAL RED GREEN BLUE ALPHA)</text>
+    <text x="384" y="118" fill-opacity="0.75">for every top-level frame's window:</text>
+    <text x="205" y="155">what you see</text>
+    <text x="205" y="237">blended</text>
+    <text x="205" y="315">tinted</text>
+    <text x="205" y="393">blurred</text>
+    <text x="384" y="184" font-size="13" font-weight="600">Emacs view (already there)</text>
+    <text x="384" y="201" fill-opacity="0.75">frost sets a blend mode on its layer:</text>
+    <text x="384" y="217" fill-opacity="0.75">screen for a dark theme, multiply for a light one</text>
+    <text x="384" y="266" font-size="13" font-weight="600">tint (added)</text>
+    <text x="384" y="283" fill-opacity="0.75">the theme's background colour at frost-tint-opacity</text>
+    <text x="384" y="344" font-size="13" font-weight="600">NSVisualEffectView (added)</text>
+    <text x="384" y="361" fill-opacity="0.75">frost-material, blurring what is behind the window</text>
+    <text x="384" y="422" font-size="13" font-weight="600">behind the window</text>
+    <text x="384" y="439" fill-opacity="0.75">the desktop and other apps' windows</text>
+  </g>
+</svg>
+<figcaption>Back to front: frost adds two views below Emacs's own and sets a blend mode on it, so the theme's background drops out to the glass and the text keeps its colours.</figcaption>
+</figure>
+
 For each top-level frame the module puts an `NSVisualEffectView` behind the frame's view, the
 size of the whole window (so the title bar, with `ns-transparent-titlebar`, is frosted too),
 then a flat tint in the theme's background colour, and sets a blend mode on the Emacs view's
