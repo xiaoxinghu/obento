@@ -34,8 +34,8 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # tool dirs that `mise activate` prepends in .zshrc.
 export PATH="${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims:$PATH"
 
-# Rust / Cargo
-[[ -d "$HOME/.cargo" ]] && . "$HOME/.cargo/env"
+# Rust / Cargo: rustup writes this file; a distro's rust package has none.
+[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
 
 # Machine-local env (e.g. OBENTO_PATH, written by setup.sh). Not tracked.
 [[ -f "${ZDOTDIR:-$HOME/.config/zsh}/local.zshenv" ]] && source "${ZDOTDIR:-$HOME/.config/zsh}/local.zshenv"
