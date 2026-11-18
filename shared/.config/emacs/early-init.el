@@ -25,15 +25,19 @@
             -100))
 
 ;; The first frame is made with these, rather than changed (and resized) by
-;; ui.el after it is drawn.  The font is from the Brewfile.
+;; ui.el after it is drawn.  The font is from the Brewfile.  Its size is in
+;; points, which macOS draws at 72 per inch and Linux at 96, so Linux takes
+;; Ghostty's 9 to match the terminal and the rest of the desktop.
 (setq frame-inhibit-implied-resize t
       tool-bar-mode nil
       scroll-bar-mode nil)
-(dolist (param '((tool-bar-lines . 0)
+(dolist (param `((tool-bar-lines . 0)
                  (vertical-scroll-bars)
                  (ns-transparent-titlebar . t)
                  (ns-appearance . dark)
-                 (font . "JetBrainsMono Nerd Font-17")))
+                 (font . ,(if (eq system-type 'darwin)
+                              "JetBrainsMono Nerd Font-17"
+                            "JetBrainsMono Nerd Font-9"))))
   (push param default-frame-alist))
 
 ;; one autoloads file instead of activating each package; where no-littering
