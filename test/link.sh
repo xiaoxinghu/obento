@@ -8,7 +8,10 @@
 set -uo pipefail
 
 OB="$(cd "$(dirname "$0")/.." && pwd)/shared/.local/bin/obento"
-case "$(uname -s)" in Darwin) P=macos O=linux ;; *) P=linux O=macos ;; esac
+case "$(uname -s)" in
+  Darwin) P=macos O=linux ;;
+  *) if [[ -d /usr/share/omarchy ]]; then P=omarchy; else P=linux; fi; O=macos ;;
+esac
 
 # ----- helpers -----
 sandbox() {

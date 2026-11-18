@@ -29,7 +29,8 @@ resolve_repo() {
 platform() {
   case "$(uname -s)" in
     Darwin) echo macos ;;
-    Linux)  echo linux ;;
+    # Omarchy is a platform of its own; linux/ is for servers.
+    Linux)  if [[ -d /usr/share/omarchy ]]; then echo omarchy; else echo linux; fi ;;
     *) echo "obento: unsupported OS: $(uname -s)" >&2; exit 1 ;;
   esac
 }

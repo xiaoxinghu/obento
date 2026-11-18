@@ -9,7 +9,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Platform-specific config (macos/ or linux/ provides ~/.config/zsh/platform.zsh).
+# Platform-specific config (macos/, linux/ or omarchy/ provides ~/.config/zsh/platform.zsh).
 [[ -r ${ZDOTDIR:-$HOME}/platform.zsh ]] && source ${ZDOTDIR:-$HOME}/platform.zsh
 
 # Activate mise early so its tools (zoxide, direnv, carapace, eza, node, …) are

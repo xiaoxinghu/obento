@@ -18,6 +18,16 @@ Linux (run from a root shell):
 curl -fsSL https://raw.githubusercontent.com/xiaoxinghu/obento/main/linux/bootstrap.sh | bash
 ```
 
+Omarchy (run as your normal user, after installing from the ISO):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/xiaoxinghu/obento/main/omarchy/bootstrap.sh | bash
+```
+
+An Omarchy machine is a platform of its own: it gets `shared/` and `omarchy/`,
+never `linux/`, which is for servers. Its packages are listed in
+`omarchy/packages`.
+
 The repo goes to `~/.obento`. To put it elsewhere, set `OBENTO_PATH`, e.g.
 `curl ... | OBENTO_PATH=~/dotfiles bash`, or move it later with `obento move <dest>`.
 Re-runs find it where it is.

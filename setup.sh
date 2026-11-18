@@ -8,7 +8,8 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 case "$(uname -s)" in
   Darwin) PLATFORM="macos" ;;
-  Linux)  PLATFORM="linux" ;;
+  # Omarchy is a platform of its own; linux/ is for servers.
+  Linux)  if [[ -d /usr/share/omarchy ]]; then PLATFORM="omarchy"; else PLATFORM="linux"; fi ;;
   *) echo "Unsupported OS: $(uname -s)" >&2; exit 1 ;;
 esac
 

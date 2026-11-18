@@ -1,0 +1,8 @@
+# Packages for an Omarchy machine, one name per line, from Omarchy's own repo
+# or Arch's; omarchy/setup.sh installs the missing ones with omarchy-pkg-add.
+# Omarchy already ships git, tmux, mise, ffmpeg, gnupg and JetBrainsMono Nerd
+# Font, and Claude Code through mise.
+
+zsh
+pass
+emacs-wayland   # Arch's Wayland (pgtk) build, the one Omarchy's own Emacs installer uses
