@@ -11,7 +11,6 @@
 ;; (setenv "GPG_TTY" "$(tty)")
 ;; .gpg files: epa-hook, preloaded, loads epa-file when one is visited
 (setenv "GPG_AGENT_INFO" nil)
-(setq epg-gpg-program "/run/current-system/sw/bin/gpg")
 (setq epg-pinentry-mode 'loopback)
 ;; (desktop-save-mode 1)
 

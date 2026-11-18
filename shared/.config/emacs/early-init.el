@@ -42,6 +42,7 @@
 (setq package-quickstart t
       package-quickstart-file
       (expand-file-name "var/package-quickstart.el" user-emacs-directory))
+(make-directory (file-name-directory package-quickstart-file) t)
 
 ;; this is for speed up the start up, will be reset by gcmh later
 (setq gc-cons-threshold most-positive-fixnum)

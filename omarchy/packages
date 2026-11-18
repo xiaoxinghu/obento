@@ -5,4 +5,5 @@
 
 zsh
 pass
+rust           # Cargo builds mise's tokei on ARM, where no release binary is available
 emacs-wayland   # Arch's Wayland (pgtk) build, the one Omarchy's own Emacs installer uses

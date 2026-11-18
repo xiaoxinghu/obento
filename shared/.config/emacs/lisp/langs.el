@@ -72,6 +72,10 @@
   (setq markdown-command "multimarkdown")
   (unbind-key "M-p" markdown-mode-map))
 
+;; md-mode's renderer depends on TextUI, which is not in the package archives.
+(use-package textui
+  :vc (:url "https://github.com/yibie/textui" :rev :newest))
+
 (use-package md-mode
   :vc (:url "https://github.com/yibie/md-mode" :rev :newest)
   :mode ("\\.\\(?:md\\|markdown\\)\\'" . md-mode)
