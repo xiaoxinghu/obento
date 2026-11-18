@@ -4,6 +4,9 @@
 -- Make Caps Lock an additional Escape on all keyboards.
 hl.config({ input = { kb_options = "caps:escape" } })
 
+-- Reverse scrolling on both mouse wheels and trackpads.
+hl.config({ input = { natural_scroll = true, touchpad = { natural_scroll = true } } })
+
 -- Slow down the external mouse without changing either trackpad.
 hl.device({ name = "logitech-g502-x-plus-1", sensitivity = -0.4 })
 
