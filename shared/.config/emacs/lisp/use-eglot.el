@@ -46,6 +46,7 @@ https://github.com/joaotavora/eglot/issues/1258"
     svelte-mode
     svelte-ts-mode
     swift-mode
+    zig-mode
     c-ts-mode
     c++-ts-mode
     c-or-c++-ts-mode

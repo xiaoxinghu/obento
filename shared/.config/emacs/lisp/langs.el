@@ -61,6 +61,9 @@
 
 (add-to-list 'auto-mode-alist '("\\.jsonc\\'" . jsonc-mode))
 
+(use-package zig-mode
+  :mode "\\.zig\\'")
+
 (use-package yaml-mode)
 
 (use-package csv-mode)

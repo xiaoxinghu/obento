@@ -7,6 +7,7 @@
 # runtimes
 node = "26.9.0"
 python = "latest"
+zig = "0.17.1"
 bun = "latest"          # upgrade with `mise upgrade bun`, not `bun upgrade`
 
 # cli tools
@@ -37,6 +38,7 @@ herdr = "latest"           # agent multiplexer (herdr.dev)
 "npm:pi-acp" = "latest"                          # ACP adapter (bridges pi <-> agent-shell/Zed)
 
 # language servers (editor-agnostic; used by eglot etc.)
+zls = "0.17.0"            # keep major/minor in sync with Zig
 # Eglot uses TypeScript's native `tsc --lsp`; keep tsls for other clients.
 "npm:typescript-language-server" = "latest"
 "npm:typescript" = "latest"
