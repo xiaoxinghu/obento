@@ -3,6 +3,11 @@
 # Omarchy already ships git, tmux, mise, ffmpeg, gnupg and JetBrainsMono Nerd
 # Font, and Claude Code through mise.
 
+# User service that handles clamshell mode on the Razer dock.
+python-gobject
+libgudev
+python-dbus
+
 zsh
 pass
 rust           # Cargo builds mise's tokei on ARM, where no release binary is available

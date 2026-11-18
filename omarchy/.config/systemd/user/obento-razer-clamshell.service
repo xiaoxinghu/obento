@@ -1,0 +1,11 @@
+[Unit]
+Description=Ignore lid-close sleep while the Razer Thunderbolt 4 Dock is attached
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/libexec/obento-razer-clamshell
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=graphical-session.target

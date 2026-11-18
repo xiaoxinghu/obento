@@ -1,0 +1,42 @@
+#!/usr/bin/python
+"""Leave lid-close sleep alone except while the Razer Thunderbolt 4 Dock is attached."""
+import os
+
+import dbus
+import gi
+
+gi.require_version("GUdev", "1.0")
+from gi.repository import GLib, GUdev
+
+
+def dock_present(client):
+    return any(
+        d.get_sysfs_attr("vendor") == "0x127" and d.get_sysfs_attr("device") == "0x8"
+        for d in client.query_by_subsystem("thunderbolt")
+    )
+
+
+def main():
+    # Subscribe before enumerating, so a hotplug during startup isn't lost.
+    client = GUdev.Client.new(["thunderbolt"])
+    loop = GLib.MainLoop()
+    client.connect("uevent", lambda *_: loop.quit())
+    login = dbus.SystemBus().get_object("org.freedesktop.login1", "/org/freedesktop/login1")
+    fd = None
+    while True:
+        present = dock_present(client)
+        if present and fd is None:
+            fd = login.Inhibit(
+                "handle-lid-switch", "obento", "Razer Thunderbolt 4 Dock attached", "block",
+                dbus_interface="org.freedesktop.login1.Manager",
+            ).take()
+            print("Dock attached: holding lid inhibitor", flush=True)
+        elif not present and fd is not None:
+            os.close(fd)
+            fd = None
+            print("Dock removed: released lid inhibitor", flush=True)
+        loop.run()
+
+
+if __name__ == "__main__":
+    main()
