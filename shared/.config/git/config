@@ -10,9 +10,6 @@
 [safe]
 	directory = /usr/local
 
-[core]
-	pager = hunk pager
-
 [interactive]
     diffFilter = delta --color-only
 [add.interactive]
