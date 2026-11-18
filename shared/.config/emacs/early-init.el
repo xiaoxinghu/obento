@@ -40,6 +40,12 @@
                             "JetBrainsMono Nerd Font-9"))))
   (push param default-frame-alist))
 
+;; macOS keeps the menus in the system menu bar; elsewhere they take a line
+;; at the top of every frame.
+(unless (eq system-type 'darwin)
+  (setq menu-bar-mode nil)
+  (push '(menu-bar-lines . 0) default-frame-alist))
+
 ;; one autoloads file instead of activating each package; where no-littering
 ;; puts it, which loads too late for this.  M-x package-quickstart-refresh
 ;; after changing packages by hand.
