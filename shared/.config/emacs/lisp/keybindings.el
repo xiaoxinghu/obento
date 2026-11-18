@@ -1,8 +1,5 @@
 ;;; -*- lexical-binding: t; -*-
 
-;; (setq mac-command-modifier 'meta)
-;; (setq mac-option-modifier 'super)
-
 (global-set-key (kbd "M-c") nil)
 
 (use-package evil
@@ -43,7 +40,7 @@
   :after evil
   :config
   (evil-commentary-mode 1)
-  ;; s-/ is `ghost-ask'; gc comments.
+  ;; Keep gc for comments; don't claim the desktop's Super shortcut.
   (keymap-unset evil-commentary-mode-map "s-/" t))
 
 (use-package evil-snipe
@@ -64,46 +61,12 @@
 (use-package hydra
   :demand t)
 
-(evil-define-key nil 'global
-  (kbd "s-o") 'find-file
-  (kbd "s-x") 'execute-extended-command
-  (kbd "s-d") 'dired-jump
-  ;; (kbd "s-w") 'kill-current-buffer
-  ;; (kbd "s-q") 'save-buffers-kill-terminal
-  ;; (kbd "s-r") 'consult-recent-file
-  (kbd "s-b") 'consult-buffer
-  ;; (kbd "s-b") 'switch-to-buffer
-  (kbd "s-g") 'magit-status
-  ;; (kbd "s-s") 'save-buffer
-  (kbd "s-S") 'save-some-buffers
-  ;; (kbd "s-v") 'yank
-  ;; (kbd "s-a") 'mark-whole-buffer
-  (kbd "s-f") 'consult-line
-  (kbd "s-F") 'consult-ripgrep
-  ;; (kbd "s-t") 'tab-new
-  ;; (kbd "s-{") 'tab-previous
-  ;; (kbd "s-}") 'tab-next
-  ;; (kbd "s-=") 'text-scale-increase
-  ;; (kbd "s--") 'text-scale-decrease
-  (kbd "s-r") 'revert-buffer-quick
-  ;; (kbd "s-0") (lambda () (interactive) (text-scale-set 0))
-  ;; (kbd "s-n") 'xah-new-empty-buffer
-  ;; (kbd "s-`") 'evil-switch-to-windows-last-buffer
-  )
-
-(defun my/global-text-scale (key)
-  "Run `global-text-scale-adjust' as if KEY had invoked it.
-It reads what to do from the key: ?- shrinks, ?0 resets, anything else
-grows.  A shifted key is another character, so it cannot say that itself."
-  (let ((last-command-event key))
-    (global-text-scale-adjust 1)))
-
-;; Command-= and Command-- scale the buffer's text; with Shift, every
-;; buffer's, and Command-Shift-0 brings that back.
-(evil-define-key nil 'global
-  (kbd "s-+") (lambda () (interactive) (my/global-text-scale ?+))
-  (kbd "s-_") (lambda () (interactive) (my/global-text-scale ?-))
-  (kbd "s-)") (lambda () (interactive) (my/global-text-scale ?0)))
+(evil-define-key 'normal 'global
+  (kbd "<leader> :") #'execute-extended-command
+  (kbd "<leader> z") '("global zoom" . (keymap))
+  (kbd "<leader> z =") #'global-text-scale-adjust
+  (kbd "<leader> z -") #'global-text-scale-adjust
+  (kbd "<leader> z 0") #'global-text-scale-adjust)
 
 (evil-define-key 'normal 'global
   (kbd "<leader>h") '("help" . (keymap))
@@ -116,6 +79,7 @@ grows.  A shifted key is another character, so it cannot say that itself."
 (defhydra hydra-file (:hint nil)
   "Files"
   ("f" find-file "find file" :color blue)
+  ("d" dired-jump "file directory" :color blue)
   ("y" yank-location "yank location" :color blue)
   ("r" consult-recent-file "recent files" :color blue)
   ("c" (find-file (expand-file-name "init.el" user-emacs-directory)) "open config" :color blue)
@@ -130,6 +94,7 @@ grows.  A shifted key is another character, so it cannot say that itself."
 Buffers
 "
   ("b" consult-buffer "buffers" :color blue)
+  ("R" revert-buffer-quick "revert" :color blue)
   ("r" my/run-current-buffer "run" :color blue)
   ("l" bufler "list" :color blue)
   ("k" kill-current-buffer "kill buffer" :color blue)
@@ -149,13 +114,11 @@ Buffers
 (evil-define-key 'normal 'global
   (kbd "<leader>u") '("universal argument" . universal-argument)
   (kbd "<leader>`") '("switch" . evil-switch-to-windows-last-buffer)
-  (kbd "<leader>o") '("open" . (keymap))
   (kbd "<leader>x") '("eval" . (keymap))
   (kbd "<leader>xx") '("eval" . elisp-eval-region-or-buffer))
 
 (evil-define-key 'normal 'global
-  (kbd "<leader>s") '("scratch" . (keymap))
-  (kbd "<leader>st") '("typescript" . (lambda ()
+  (kbd "<leader>st") '("TypeScript scratch" . (lambda ()
 																				(interactive)
 																				(my-open-scratch 'typescript))))
 

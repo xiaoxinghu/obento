@@ -129,9 +129,10 @@
   :local "~/files/workspace/.repos/github.com/justfiles/justfiles/packages/shell/emacs"
   :commands (ghost-ask ghost-ask-insert ghost-steer ghost-abort ghost-new ghost-transcript
              ghost-explain)
-	:bind
-  (("s-/" . ghost-ask)
-   ("s-j" . ghost-transcript))
+  :init
+  (evil-define-key 'normal 'global
+    (kbd "<leader> /") #'ghost-ask
+    (kbd "<leader> a t") #'ghost-transcript)
   :config
   ;; quoted: this file is not compiled, and Emacs eagerly expands macros in
   ;; the deferred :config, which would load ghost at startup for this one

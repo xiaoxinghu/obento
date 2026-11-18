@@ -107,10 +107,8 @@
 (use-package portal
   :local "~/files/workspace/.repos/github.com/xiaoxinghu/portal"
   :vc (:url "https://github.com/xiaoxinghu/portal" :rev :newest)
-	;; once idle: portal-web loads url and browse-url; s-t is there a second
-	;; after the frame
-	:defer 1
-  :bind (("s-p" . hydra-portal/body))
+  ;; Load after the frame: portal-web loads url and browse-url.
+  :defer 1
 	:custom
 	(portal-terminal-theme "Catppuccin Mocha")
 	;; Escape twice returns from a view's app to Emacs, as Escape leaves insert state.
@@ -134,6 +132,8 @@
      :preview-key 'any))
   (defhydra hydra-portal (:color blue :hint nil)
     "Portal"
+    ("RET" my/terminal "go to terminal")
+    ("T" portal-terminal-toggle "toggle quick terminal")
     ("p" portal-terminal-choose-project "project terminal")
     ("t" portal-terminal-choose "all terminals")
     ("n" portal-terminal-new "new terminal")
@@ -156,10 +156,8 @@ From inside the only terminal, choose too, so a new one is a key away."
              (portal-terminal-select (car buffers)))
             (t (portal-terminal-choose)))))
 
-	(keymap-global-set "s-t" #'my/terminal)
-	(keymap-global-set "s-T" #'portal-terminal-toggle)
-	(portal-terminal-bind-key portal-terminal-quick-native-map
-														"s-T" #'portal-terminal-toggle)
+  ;; When the native view has focus, Escape twice before using the leader.
+  (evil-define-key 'normal 'global (kbd "<leader> P") #'hydra-portal/body)
 
   (require 'portal-launcher)
 

@@ -84,15 +84,18 @@
   :init
   (marginalia-mode))
 
-;; TODO: add meaningful bindings
-;; (with-eval-after-load 'isearch
-;; 	(define-key isearch-mode-map (kbd "s-e") nil))
 (use-package embark
-  :bind
-  ("s-." . embark-act)
-  ("s-;" . embark-dwim)
-  ("s-e" . embark-export)
-  ("C-h B" . embark-bindings))
+  :init
+  (evil-define-key 'normal 'global
+    (kbd "<leader> .") #'embark-act
+    (kbd "<leader> ;") #'embark-dwim
+    (kbd "<leader> E") #'embark-export)
+  :bind (("C-h B" . embark-bindings)
+         ;; Space inserts text when choosing a completion candidate.
+         :map minibuffer-local-map
+         ("C-." . embark-act)
+         ("C-;" . embark-dwim)
+         ("C-c C-e" . embark-export)))
 
 (use-package embark-consult
   :after (consult embark)
