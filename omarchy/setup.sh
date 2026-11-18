@@ -20,6 +20,12 @@ zsh_bin="$(command -v zsh)"
 if [[ "$(getent passwd "$(id -un)" | cut -d: -f7)" != "$zsh_bin" ]]; then
   sudo chsh -s "$zsh_bin" "$(id -un)"
 fi
+# The user manager can survive logout, and uwsm never imports SHELL. Update
+# both activation environments so newly started terminals see the new shell.
+# Existing terminal processes still need to be quit, or use `exec zsh -l`.
+if [[ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ]]; then
+  dbus-update-activation-environment --systemd "SHELL=$zsh_bin"
+fi
 
 # ----- neovim -----
 # Omarchy seeds a whole Neovim config. obento links its own files one by one
