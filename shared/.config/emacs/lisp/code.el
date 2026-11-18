@@ -127,7 +127,6 @@
   ;; Open magit in the current window; `q' restores the previous buffer there
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
   (magit-diff-refine-hunk 'all)
-  (magit-git-executable "/opt/homebrew/bin/git")
 	(magit-diff-arguments '("--ignore-all-space"))
   ;; Syntax-highlight hunks with the file's major mode (Magit 4.6, experimental:
   ;; synchronous, so large diffs may pause).  The foreground option must be nil

@@ -219,28 +219,9 @@
     ('light (load-theme my/light-theme t))
     ('dark (load-theme my/dark-theme t))))
 
-(add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
-
-;; frosted-glass frames, a package of its own in frost/ until it has a repo
-(use-package frost
-	:disabled t
-  :ensure nil
-  :load-path "frost"
-  :hook (after-init . frost-mode)
-  :init
-  ;; Portal's terminals and Markdown previews are glass with the frame. The
-  ;; dark glass is close to their dark backgrounds, so 0.85 shows no
-  ;; difference; 0.3 does.
-  (defvar portal-terminal-opacity)
-  (defvar portal-web-preview-opacity)
-  (add-hook 'frost-mode-hook
-            (lambda ()
-              (setq portal-terminal-opacity (if frost-mode 0.3 1)
-                    portal-web-preview-opacity (if frost-mode 0.3 1)))))
-
-;; scrolling
-(setq mac-redisplay-dont-reset-vscroll t
-      mac-mouse-wheel-smooth-scroll nil)
+;; macOS says which appearance is on, at startup too (macos.el); elsewhere it is dark.
+(unless (eq system-type 'darwin)
+  (add-hook 'after-init-hook (lambda () (my/apply-theme 'dark))))
 
 (use-package spacious-padding
 	:disabled t

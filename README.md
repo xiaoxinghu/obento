@@ -42,6 +42,6 @@ obento add ~/.config/seth/seth.toml
 
 `obento link` links each file on its own, inside real dirs, so apps can keep
 runtime state next to their config without it landing in the repo. A dir with
-its own `.gitignore` (e.g. `macos/.config/emacs`) is linked whole instead, and
+its own `.gitignore` (e.g. `shared/.config/emacs`) is linked whole instead, and
 that `.gitignore` keeps its runtime state out of git. Anything already in the
 way is moved aside to `<path>.obento-bak`, never deleted. Tests: `test/link.sh`.

@@ -4,7 +4,6 @@
 ;; (setq mac-option-modifier 'super)
 
 (global-set-key (kbd "M-c") nil)
-(global-set-key (kbd "M-h") 'ns-do-hide-emacs)
 
 (use-package evil
   :demand t

@@ -46,7 +46,7 @@ fi
 # Emacs reads PATH from ~/.env.el instead of starting a shell; write it now that
 # the shell config is linked and mise's tools are installed.
 if [[ "$PLATFORM" == "macos" ]] && command -v emacs >/dev/null 2>&1; then
-  "$REPO/macos/.config/emacs/env.sh"
+  "$REPO/shared/.config/emacs/env.sh"
 fi
 
 # ----- github ssh key -----
