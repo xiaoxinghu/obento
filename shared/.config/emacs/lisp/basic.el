@@ -41,6 +41,7 @@
 
 ;; `:local DIR' loads a package from my checkout when DIR exists, in place
 ;; of `:vc' or `:ensure'.  Without DIR and without `:vc', the package is skipped.
+;; DIR can be a list of directories, one per machine: the first that exists.
 ;; Its `;;;###autoload' cookies are honoured, as for an installed package.
 (add-to-list 'use-package-keywords :local)
 
@@ -68,7 +69,10 @@
 (defun use-package-normalize/:local (_name keyword args)
   (use-package-only-one (symbol-name keyword) args
     (lambda (_label arg)
-      (if (stringp arg) arg (use-package-error ":local wants a directory")))))
+      (cond ((stringp arg) arg)
+            ((and (consp arg) (seq-every-p #'stringp arg))
+             (or (seq-find #'file-directory-p arg) (car arg)))
+            (t (use-package-error ":local wants a directory or a list of them"))))))
 
 (defun use-package-handler/:local (name _keyword dir rest state)
   (cond

@@ -36,6 +36,7 @@
 (require 'langs)
 (require 'tools)
 (require 'ai)
+(require 'use-portal)
 ;; Finder, the dictionary, take and the launcher
 (when (eq system-type 'darwin)
   (require 'macos))
