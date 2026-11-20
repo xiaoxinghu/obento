@@ -32,7 +32,8 @@
     ("T" portal-terminal-toggle "toggle quick terminal")
     ("p" portal-terminal-choose-project "project terminal")
     ("t" portal-terminal-choose "all terminals")
-    ("n" portal-terminal-new "new terminal")
+    ("n" portal-terminal-new "new local terminal")
+    ("N" portal-rex-new-terminal "new Rex terminal")
     ("r" portal-terminal-rename "rename terminal")
     ("z" portal-terminal-zoom "zoom terminal")
     ("i" flow-implement "implement task in herdr")
@@ -53,6 +54,8 @@ From inside the only terminal, choose too, so a new one is a key away."
             (t (portal-terminal-choose)))))
 
   ;; Return focus to Emacs before using the leader.
-  (evil-define-key 'normal 'global (kbd "<leader> P") #'hydra-portal/body))
+  (evil-define-key 'normal 'global
+    (kbd "<leader> RET") #'my/terminal
+    (kbd "<leader> P") #'hydra-portal/body))
 
 (provide 'use-portal)

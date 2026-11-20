@@ -82,7 +82,7 @@
     ("c" my/project-compile "compile" :color blue)
     ("C" recompile "recompile" :color blue)
     ("s" my/run-package-script "npm script" :color blue)
-    ("t" ghostel-project "terminal" :color blue)
+    ("t" portal-terminal-choose-project "project terminals" :color blue)
     ("r" forge-browse-repository "repos" :color blue)
     ("q" nil))
 
